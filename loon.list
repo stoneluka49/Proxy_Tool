@@ -67,7 +67,7 @@ DOMAIN-SUFFIX,devs.data.mob.com,REJECT
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
 DOMAIN-SUFFIX,beacon.sina.com.cn,REJECT
 DOMAIN-SUFFIX,e.kuaishou.com,REJECT
-DOMAIN-SUFFIX,pinduoduo.com/ad,REJECT
+
 
 # 小米 / 华为 / TV 端开屏广告
 DOMAIN-SUFFIX,ad.xiaomi.com,REJECT
@@ -154,7 +154,6 @@ DOMAIN-SUFFIX,aihaoduo.cn,REJECT
 DOMAIN-SUFFIX,ajapk.com,REJECT
 DOMAIN-SUFFIX,allyes.cn,REJECT
 DOMAIN-SUFFIX,allyes.com,REJECT
-DOMAIN-SUFFIX,amazon-adsystem.com,REJECT
 DOMAIN-SUFFIX,analysys.cn,REJECT
 DOMAIN-SUFFIX,angsrvr.com,REJECT
 DOMAIN-SUFFIX,anquan.org,REJECT
@@ -165,7 +164,6 @@ DOMAIN-SUFFIX,appboy.com,REJECT
 DOMAIN-SUFFIX,appdriver.cn,REJECT
 DOMAIN-SUFFIX,appjiagu.com,REJECT
 DOMAIN-SUFFIX,applifier.com,REJECT
-DOMAIN-SUFFIX,appsflyer.com,REJECT
 DOMAIN-SUFFIX,atdmt.com,REJECT
 DOMAIN-SUFFIX,baifendian.com,REJECT
 DOMAIN-SUFFIX,banmamedia.com,REJECT
@@ -192,7 +190,6 @@ DOMAIN-SUFFIX,cdnmaster.com,REJECT
 DOMAIN-SUFFIX,chance-ad.com,REJECT
 DOMAIN-SUFFIX,chanet.com.cn,REJECT
 DOMAIN-SUFFIX,chartbeat.com,REJECT
-DOMAIN-SUFFIX,chartboost.com,REJECT
 DOMAIN-SUFFIX,chengadx.com,REJECT
 DOMAIN-SUFFIX,chmae.com,REJECT
 DOMAIN-SUFFIX,clickadu.com,REJECT
@@ -246,8 +243,8 @@ DOMAIN-SUFFIX,gentags.net,REJECT
 DOMAIN-SUFFIX,gepush.com,REJECT
 DOMAIN-SUFFIX,getui.com,REJECT
 DOMAIN-SUFFIX,glispa.com,REJECT
-DOMAIN-SUFFIX,go-mpulse,REJECT
 DOMAIN-SUFFIX,go-mpulse.net,REJECT
+DOMAIN-SUFFIX,go-mpulse.com,REJECT
 DOMAIN-SUFFIX,godloveme.cn,REJECT
 DOMAIN-SUFFIX,gridsum.com,REJECT
 DOMAIN-SUFFIX,gridsumdissector.cn,REJECT
@@ -369,7 +366,6 @@ DOMAIN-SUFFIX,rlcdn.com,REJECT
 DOMAIN-SUFFIX,rtbasia.com,REJECT
 DOMAIN-SUFFIX,sanya1.com,REJECT
 DOMAIN-SUFFIX,scupio.com,REJECT
-DOMAIN-SUFFIX,serving-sys.com,REJECT
 DOMAIN-SUFFIX,shuiguo.com,REJECT
 DOMAIN-SUFFIX,shuzilm.cn,REJECT
 DOMAIN-SUFFIX,similarweb.com,REJECT
@@ -424,7 +420,6 @@ DOMAIN-SUFFIX,voiceads.cn,REJECT
 DOMAIN-SUFFIX,voiceads.com,REJECT
 DOMAIN-SUFFIX,vpon.com,REJECT
 DOMAIN-SUFFIX,vungle.cn,REJECT
-DOMAIN-SUFFIX,vungle.com,REJECT
 DOMAIN-SUFFIX,waps.cn,REJECT
 DOMAIN-SUFFIX,wapx.cn,REJECT
 DOMAIN-SUFFIX,webterren.com,REJECT
@@ -643,6 +638,14 @@ DOMAIN-SUFFIX,win-stock.com.cn,REJECT
 DOMAIN-SUFFIX,zantainet.com,REJECT
 DOMAIN-SUFFIX,dh54wf.xyz,REJECT
 DOMAIN-SUFFIX,g2q3e.cn,REJECT
+DOMAIN-SUFFIX,newrelic.com,REJECT
+DOMAIN-SUFFIX,newrelic.net,REJECT
+DOMAIN-SUFFIX,datadoghq.com,REJECT
+DOMAIN-SUFFIX,segment.io,REJECT
+DOMAIN-SUFFIX,amplitude.com,REJECT
+DOMAIN-SUFFIX,posthog.com,REJECT
+DOMAIN-SUFFIX,fullstory.com,REJECT
+DOMAIN-SUFFIX,heap.io,REJECT
 
 # ==================== 6. 运营商劫持广告 ====================
 DOMAIN-SUFFIX,114so.cn,REJECT
@@ -681,7 +684,6 @@ DOMAIN-SUFFIX,c.bing.com,REJECT
 DOMAIN-SUFFIX,bat.bing.com,REJECT
 
 # ==================== Amazon ====================
-DOMAIN-SUFFIX,aax.amazon-adsystem.com,REJECT
 DOMAIN-SUFFIX,amazon-adsystem.com,REJECT
 DOMAIN-SUFFIX,amazon-analytics.com,REJECT
 
