@@ -1,1 +1,14 @@
+#rules:
+  # 按照逻辑匹配域名后缀
+   DOMAIN-SUFFIX,instagram.com,代理节点
+   DOMAIN-SUFFIX,cdninstagram.com,代理节点
+   DOMAIN-SUFFIX,facebook.com,代理节点
+   DOMAIN-SUFFIX,fbcdn.net,代理节点
+   DOMAIN-SUFFIX,whatsapp.com,代理节点
+   DOMAIN-SUFFIX,whatsapp.net,代理节点
+   DOMAIN-SUFFIX,threads.net,代理节点
+  
+  # 按 Meta 官方 ASN 分流（强烈推荐，可自动处理所有未列出的 CDN 域名）
+    IP-ASN,32934,代理节点,no-resolve
+    IP-ASN,54115,代理节点,no-resolve
 
