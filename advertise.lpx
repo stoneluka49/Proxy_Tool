@@ -8,21 +8,12 @@ DOMAIN-SUFFIX,g1.tagtic.cn,REJECT
 DOMAIN-SUFFIX,adlog.tagtic.cn,REJECT
 # > 百度网盘
 DOMAIN-SUFFIX,feed-image.baidu.com,REJECT
-# > 我的天气
-DOMAIN-SUFFIX,pic.yupoo.com,REJECT-DICT
 # > 滴滴
 DOMAIN-SUFFIX,gwp.xiaojukeji.com,REJECT-DROP
 IP-CIDR,123.207.209.39/32,REJECT-DROP,no-resolve
 IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
 
 [Rewrite]
-#bilibili
-^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.app\.view\.v1\.View\/TFInfo$ - reject-dict
-^https:\/\/app\.bilibili\.com\/x\/resource\/ip - reject-dict
-^https:\/\/api\.bilibili\.com\/x\/web-interface\/zone\?jsonp - reject-dict
-(^https:\/\/live\.bilibili\.com\/\d+)(\/?\?.*) $1 307
-(^https:\/\/(?:www|m)\.bilibili\.com\/video\/(?:BV\w{10}|av\d{9}))(\/?\?.*) $1 307
-^https:\/\/api\.live\.bilibili\.com\/xlive\/web-room\/v1\/index\/getIpInfo - reject-dict
 # > 中国银行
 ^https:\/\/mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/.+.jpg - reject-200
 #^https?:\/\/intellicc\.\w+\.cmbchina\.com\/Edge\/api\/mlife\.intelli\.render\.api\.render\/getDynamicDataSec url REJECT-DICT
