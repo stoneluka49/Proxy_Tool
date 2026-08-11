@@ -1,1 +1,20 @@
 
+# NAME: Personal-Rules
+# AUTHOR: stoneluka
+# 个人自定义分流规则列表
+
+# --- Emby 私人影院 ---
+DOMAIN-SUFFIX,emby.bangumi.ca,emby
+DOMAIN-SUFFIX,media.nijigem.by,emby
+
+# --- 体育/NBA 直播站点 ---
+DOMAIN-KEYWORD,jrszb,NBA
+DOMAIN-KEYWORD,yumixiu,NBA
+DOMAIN-KEYWORD,sportsteam,NBA
+DOMAIN-SUFFIX,jrszb2018.com,NBA
+DOMAIN-SUFFIX,jrszb111.com,NBA
+DOMAIN-SUFFIX,jrszb444.com,NBA
+
+# --- 工具与服务 ---
+DOMAIN-SUFFIX,whatshub.top,VPN模块集
+DOMAIN-SUFFIX,app.localhost.direct,DIRECT
