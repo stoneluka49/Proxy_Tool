@@ -1,1 +1,57 @@
+#!name = 常用外网与技术论坛规则集
+#!desc = 包含 DNS 防泄漏测试、主机/技术论坛、社交媒体及常用外网服务
 
+# ==================== 1. DNS 防泄漏与 IP 检测 ====================
+DOMAIN-SUFFIX, dnsleaktest.com, PROXY
+DOMAIN-SUFFIX, dnsleak.com, PROXY
+DOMAIN-SUFFIX, ipleak.net, PROXY
+DOMAIN-SUFFIX, browserleaks.com, PROXY
+DOMAIN-SUFFIX, browserleaks.org, PROXY
+DOMAIN-SUFFIX, pixelscan.net, PROXY
+DOMAIN-SUFFIX, whoer.net, PROXY
+DOMAIN-SUFFIX, whrq.net, PROXY
+DOMAIN-SUFFIX, ip.sb, PROXY
+DOMAIN-SUFFIX, ip135.com, PROXY
+DOMAIN-SUFFIX, ip125.com, PROXY
+DOMAIN-SUFFIX, test-ipv6.com, PROXY
+DOMAIN-SUFFIX, dnsleak.asn247.net, PROXY
+DOMAIN-SUFFIX, surfsharkdns.com, PROXY
+
+# ==================== 2. 主机/技术/Vibe 论坛与社区 ====================
+# NodeSeek 社区
+DOMAIN-SUFFIX, nodeseek.com, PROXY
+
+# V2EX 社区
+DOMAIN-SUFFIX, v2ex.com, PROXY
+
+# Linux Do 社区
+DOMAIN-SUFFIX, linux.do, PROXY
+
+# Hostloc (左岸/主机交流)
+DOMAIN-SUFFIX, hostloc.com, PROXY
+
+# LowEndTalk / LowEndBox
+DOMAIN-SUFFIX, lowendtalk.com, PROXY
+DOMAIN-SUFFIX, lowendbox.com, PROXY
+
+# Reddit
+DOMAIN-SUFFIX, reddit.com, PROXY
+DOMAIN-SUFFIX, redd.it, PROXY
+DOMAIN-SUFFIX, redditstatic.com, PROXY
+
+# Stack Overflow / Stack Exchange
+DOMAIN-SUFFIX, stackoverflow.com, PROXY
+DOMAIN-SUFFIX, stackexchange.com, PROXY
+
+# Hacker News
+DOMAIN-SUFFIX, ycombinator.com, PROXY
+
+# ==================== 3. 常用开发者与代码托管平台 ====================
+# Docker / HuggingFace
+DOMAIN-SUFFIX, docker.com, PROXY
+DOMAIN-SUFFIX, docker.io, PROXY
+DOMAIN-SUFFIX, huggingface.co, PROXY
+
+# ==================== 4. 社交媒体与主流外网 ====================
+# Wikipedia
+DOMAIN-SUFFIX, wikipedia.org, PROXY
