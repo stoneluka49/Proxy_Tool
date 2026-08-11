@@ -14,6 +14,9 @@ IP-CIDR,123.207.209.39/32,REJECT-DROP,no-resolve
 IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
 
 [Rewrite]
+**腾讯**
+^https:\/\/upos-hz-mirrorakam\.akamaized\.net 307 https://upos-sz-mirrorcos.bilivideo.com
+^https:\/\/upos-hz-mirrorakam\.akamaized\.net 307 https://upos-sz-mirrorcosb.bilivideo.com
 # > 中国银行
 ^https:\/\/mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/.+.jpg - reject-200
 #^https?:\/\/intellicc\.\w+\.cmbchina\.com\/Edge\/api\/mlife\.intelli\.render\.api\.render\/getDynamicDataSec url REJECT-DICT
@@ -105,4 +108,4 @@ http-response ^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token) script-path=h
 http-response ^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?) script-path=https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js, requires-body=true, tag=AdGuard
 
 [MITM]
-hostname = %APPEND%  cdn.wup.huya.com, business.msstatic.com, cdnfile1.msstatic.com, live-ads.huya.com,capis*.didapinche.com, adx-cn.anythinktech.com, www.didapinche.com, daijia.kuaidadi.com, as.xiaojukeji.com, pt-starimg.didistatic.com, omgup*.xiaojukeji.com, api.pinduoduo.com, api.yangkeduo.com, mobile.yangkeduo.com, gw.alicdn.com,heic.alicdn.com,asp.cntv.myalicdn.com,res.xiaojukeji.com,common.diditaxi.com.cn,hd.xiaojukeji.com,freight.xiaojukeji.com,daijia.kuaidadi.com,ct.xiaojukeji.com,conf.diditaxi.com.cn,mbs.boc.cn,mobile-api.adguard.org,nga.178.com,list-app-m.i4.cn,oauth.secure.pixiv.net,cdn.133.cn,*.baidu.com,*mbasecc.b*s.cmbchina.com,intellicc.b*s.cmbchina.com,ndstatic.cdn.bcebos.com,staticsns.cdn.bcebos.com,issuecdn.baidupcs.com,dss0.bdstatic.com,-imerres.baidu.com,*live.bilibili.com,ap?.bilibili.com
+hostname = %APPEND%  cdn.wup.huya.com, business.msstatic.#com, cdnfile1.msstatic.com, live-ads.huya.com,capis*.didapinche.com, adx-cn.anythinktech.com, www.didapinche.com, daijia.kuaidadi.com, as.xiaojukeji.com, pt-starimg.didistatic.com, omgup*.xiaojukeji.com, api.pinduoduo.com, api.yangkeduo.com, mobile.yangkeduo.com, gw.alicdn.com,heic.alicdn.com,asp.cntv.myalicdn.com,res.xiaojukeji.com,common.diditaxi.com.cn,hd.xiaojukeji.com,freight.xiaojukeji.com,daijia.kuaidadi.com,ct.xiaojukeji.com,conf.diditaxi.com.cn,mbs.boc.cn,mobile-api.adguard.org,nga.178.com,list-app-m.i4.cn,oauth.secure.pixiv.net,cdn.133.cn,*.baidu.com,*mbasecc.b*s.cmbchina.com,intellicc.b*s.cmbchina.com,ndstatic.cdn.bcebos.com,staticsns.cdn.bcebos.com,issuecdn.baidupcs.com,dss0.bdstatic.com,-imerres.baidu.com
