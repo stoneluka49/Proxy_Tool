@@ -1,1 +1,8 @@
-
+# NAME: BiliBili
+DOMAIN-SUFFIX,upos-sz-mirrorawsov.bilivideo.com
+DOMAIN-SUFFIX,upos-sz-mirrorcosov.bilivideo.com
+DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net
+DOMAIN-SUFFIX,bilibili.com,API
+DOMAIN-SUFFIX,biliapi.net,API
+DOMAIN-SUFFIX,biliapi.com,API
+DOMAIN-KEYWORD,bilibili,API
