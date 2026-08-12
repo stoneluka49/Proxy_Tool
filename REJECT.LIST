@@ -63,11 +63,10 @@ DOMAIN-SUFFIX,fp-it.fengkongcloud.com,REJECT
 DOMAIN-SUFFIX,logapi-ios.zhipin.com,REJECT
 DOMAIN-SUFFIX,devs.data.mob.com,REJECT
 
-# 微博 / 拼多多 / 快手广告
+# 微博 / 快手广告
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
 DOMAIN-SUFFIX,beacon.sina.com.cn,REJECT
 DOMAIN-SUFFIX,e.kuaishou.com,REJECT
-DOMAIN-SUFFIX,pinduoduo.com/ad,REJECT
 
 # 小米 / 华为 / TV 端开屏广告
 DOMAIN-SUFFIX,ad.xiaomi.com,REJECT
