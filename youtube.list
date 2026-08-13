@@ -1,12 +1,20 @@
-# Surge / Loon / QuanX Rule Set
-DOMAIN-KEYWORD,youtube,🎥 YouTube
-DOMAIN-KEYWORD,googlevideo,🎥 YouTube
+# ===== YouTube =====
+DOMAIN-SUFFIX,youtube.com,🎥 YouTube
 DOMAIN-SUFFIX,youtu.be,🎥 YouTube
 DOMAIN-SUFFIX,yt.be,🎥 YouTube
+DOMAIN-SUFFIX,youtube-nocookie.com,🎥 YouTube
+DOMAIN-SUFFIX,youtubekids.com,🎥 YouTube
+DOMAIN-SUFFIX,youtubeeducation.com,🎥 YouTube
+
+# YouTube 静态资源 / 图片
 DOMAIN-SUFFIX,ytimg.com,🎥 YouTube
 DOMAIN-SUFFIX,ggpht.com,🎥 YouTube
+
+# YouTube 视频 CDN
+DOMAIN-SUFFIX,googlevideo.com,🎥 YouTube
 DOMAIN-SUFFIX,gvt1.com,🎥 YouTube
 DOMAIN-SUFFIX,gvt2.com,🎥 YouTube
-DOMAIN-SUFFIX,youtube-nocookie.com,🎥 YouTube
-DOMAIN-SUFFIX,youtubeeducation.com,🎥 YouTube
-DOMAIN-SUFFIX,youtubekids.com,🎥 YouTube
+
+# YouTube API
+DOMAIN-SUFFIX,youtubei.googleapis.com,🎥 YouTube
+DOMAIN-SUFFIX,youtube.googleapis.com,🎥 YouTube
