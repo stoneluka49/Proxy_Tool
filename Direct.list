@@ -1,28 +1,43 @@
-
+# ==================================================
 # NAME: Personal-Rules
 # AUTHOR: stoneluka
-# 个人自定义分流规则列表
+# 个人自定义分流规则
+# ==================================================
 
-# --- Emby 私人影院 ---
+
+# ==================================================
+# Emby 私人影院
+# ==================================================
+
 DOMAIN-SUFFIX,emby.bangumi.ca,emby
 DOMAIN-SUFFIX,media.nijigem.by,emby
 
-# --- 体育/NBA 直播站点 ---
+
+# ==================================================
+# 体育 / NBA
+# ==================================================
+
 DOMAIN-KEYWORD,jrszb,NBA
 DOMAIN-KEYWORD,yumixiu,NBA
 DOMAIN-KEYWORD,sportsteam,NBA
-DOMAIN-SUFFIX,jrszb2018.com,NBA
-DOMAIN-SUFFIX,jrszb111.com,NBA
-DOMAIN-SUFFIX,jrszb444.com,NBA
-DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net
-DOMAIN-KEYWORD,bilivideo,DIRECT
 
-# --- 工具与服务 ---
+# ==================================================
+# Bilibili
+# ==================================================
+
+DOMAIN-KEYWORD,bilivideo,DIRECT
+DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net,DIRECT
+
+# ==================================================
+# 工具与服务
+# ==================================================
+
 DOMAIN-SUFFIX,whatshub.top,VPN模块集
 DOMAIN-SUFFIX,app.localhost.direct,DIRECT
 
-# 将其归入 Apple 直连服务中
-DOMAIN-SUFFIX, apis.apple.map.fastly.net, DIRECT
-# 或者更通用的苹果地图直连规则
-DOMAIN-KEYWORD, apple.map, DIRECT
 
+# ==================================================
+# Apple Maps
+# ==================================================
+
+DOMAIN-SUFFIX,apis.apple.map.fastly.net,DIRECT
