@@ -1,40 +1,54 @@
-# === Telegram / Swiftgram /Turrit 等核心域名规则 ===
-DOMAIN-SUFFIX, swiftgram.app, ✈️ Telegram
-DOMAIN-SUFFIX, nicegram.app, ✈️ Telegram
-DOMAIN-SUFFIX, imem.app, ✈️ Telegram
-DOMAIN-SUFFIX, ime.im, ✈️ Telegram
-DOMAIN-SUFFIX, turrit.app, ✈️ Telegram
-DOMAIN-SUFFIX, getturrit.com, ✈️ Telegram
-DOMAIN-SUFFIX, nekogram.app, ✈️ Telegram
-DOMAIN-KEYWORD, telegram, ✈️ Telegram
-DOMAIN-SUFFIX, t.me, ✈️ Telegram
-DOMAIN-SUFFIX, tdesktop.com, ✈️ Telegram
-DOMAIN-SUFFIX, telegra.ph, ✈️ Telegram
-DOMAIN-SUFFIX, telesco.pe, ✈️ Telegram
-DOMAIN-SUFFIX, tg.dev, ✈️ Telegram
-DOMAIN-SUFFIX, telegram-cdn.org, ✈️ Telegram
+# ==================================================
+# Telegram / Swiftgram / Turrit / Nicegram
+# ==================================================
 
-# === Telegram 官方 ASN (Autonomous System) ===
-# AS62041 / AS59930 / AS44907 涵盖 TG 全球 DC 数据中心
-IP-ASN, 62041, ✈️ Telegram, no-resolve
-IP-ASN, 59930, ✈️ Telegram, no-resolve
-IP-ASN, 44907, ✈️ Telegram, no-resolve
+# --- Telegram / Third-party Clients ---
+DOMAIN-SUFFIX,swiftgram.app,✈️ Telegram
+DOMAIN-SUFFIX,nicegram.app,✈️ Telegram
+DOMAIN-SUFFIX,imem.app,✈️ Telegram
+DOMAIN-SUFFIX,ime.im,✈️ Telegram
+DOMAIN-SUFFIX,turrit.app,✈️ Telegram
+DOMAIN-SUFFIX,getturrit.com,✈️ Telegram
+DOMAIN-SUFFIX,nekogram.app,✈️ Telegram
 
-# === Telegram 官方 IPv4 核心网段 ===
-IP-CIDR, 91.108.4.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 91.108.8.0/21, ✈️ Telegram, no-resolve
-IP-CIDR, 91.108.16.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 91.108.56.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 149.154.160.0/20, ✈️ Telegram, no-resolve  # 亚太地区 (DC5 新加坡) 核心段
-IP-CIDR, 149.154.164.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 149.154.168.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 149.154.172.0/22, ✈️ Telegram, no-resolve
-IP-CIDR, 185.76.151.0/24, ✈️ Telegram, no-resolve
+# --- Telegram Official ---
+DOMAIN-SUFFIX,telegram.org,✈️ Telegram
+DOMAIN-SUFFIX,t.me,✈️ Telegram
+DOMAIN-SUFFIX,tdesktop.com,✈️ Telegram
+DOMAIN-SUFFIX,telegra.ph,✈️ Telegram
+DOMAIN-SUFFIX,telesco.pe,✈️ Telegram
+DOMAIN-SUFFIX,tg.dev,✈️ Telegram
+DOMAIN-SUFFIX,telegram-cdn.org,✈️ Telegram
 
-# === Telegram 官方 IPv6 核心网段 ===
-IP-CIDR6, 2001:b28:f23d::/48, ✈️ Telegram, no-resolve
-IP-CIDR6, 2001:b28:f23f::/48, ✈️ Telegram, no-resolve
-IP-CIDR6, 2001:67c:4e8::/48, ✈️ Telegram, no-resolve
+# --- Telegram Keyword Fallback ---
+DOMAIN-KEYWORD,telegram,✈️ Telegram
 
 
+# ==================================================
+# Telegram IPv4
+# ==================================================
 
+IP-CIDR,91.108.4.0/22,✈️ Telegram,no-resolve
+IP-CIDR,91.108.8.0/21,✈️ Telegram,no-resolve
+IP-CIDR,91.108.16.0/22,✈️ Telegram,no-resolve
+IP-CIDR,91.108.56.0/22,✈️ Telegram,no-resolve
+IP-CIDR,149.154.160.0/20,✈️ Telegram,no-resolve
+IP-CIDR,185.76.151.0/24,✈️ Telegram,no-resolve
+
+
+# ==================================================
+# Telegram IPv6
+# ==================================================
+
+IP-CIDR6,2001:b28:f23d::/48,✈️ Telegram,no-resolve
+IP-CIDR6,2001:b28:f23f::/48,✈️ Telegram,no-resolve
+IP-CIDR6,2001:67c:4e8::/48,✈️ Telegram,no-resolve
+
+
+# ==================================================
+# Telegram ASN — Optional Fallback
+# ==================================================
+
+IP-ASN,62041,✈️ Telegram,no-resolve
+IP-ASN,59930,✈️ Telegram,no-resolve
+IP-ASN,44907,✈️ Telegram,no-resolve
