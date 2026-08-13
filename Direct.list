@@ -20,3 +20,9 @@ DOMAIN-KEYWORD,bilivideo,DIRECT
 # --- 工具与服务 ---
 DOMAIN-SUFFIX,whatshub.top,VPN模块集
 DOMAIN-SUFFIX,app.localhost.direct,DIRECT
+
+# 将其归入 Apple 直连服务中
+DOMAIN-SUFFIX, apis.apple.map.fastly.net, DIRECT
+# 或者更通用的苹果地图直连规则
+DOMAIN-KEYWORD, apple.map, DIRECT
+
