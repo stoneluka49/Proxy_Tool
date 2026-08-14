@@ -453,8 +453,6 @@ DOMAIN-SUFFIX,tpc.googlesyndication.com,REJECT
 
 # Meta / Facebook
 DOMAIN-SUFFIX,facebookadservices.com,REJECT
-DOMAIN-SUFFIX,connect.facebook.net,REJECT
-DOMAIN-SUFFIX,graph.facebook.com,REJECT
 DOMAIN-SUFFIX,analytics.facebook.com,REJECT
 
 # Microsoft / Bing
@@ -651,9 +649,8 @@ DOMAIN-SUFFIX,tapjoy.cn,REJECT
 DOMAIN-SUFFIX,tapjoy.com,REJECT
 DOMAIN-SUFFIX,tapjoyads.com,REJECT
 
-# 崩溃分析与用户行为 (Firebase / Crashlytics / Sentry / Mixpanel / Segment / Amplitude)
+# 崩溃分析与用户行为 (Firebase / Sentry / Mixpanel / Segment / Amplitude)
 DOMAIN-SUFFIX,app-measurement.com,REJECT
-DOMAIN-SUFFIX,crashlytics.com,REJECT
 DOMAIN-SUFFIX,ingest.sentry.io,REJECT
 DOMAIN-SUFFIX,mixpanel.com,REJECT
 DOMAIN-SUFFIX,segment.com,REJECT
