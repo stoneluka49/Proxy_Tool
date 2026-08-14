@@ -58,6 +58,7 @@ DOMAIN-SUFFIX,pos.baidu.com,REJECT
 DOMAIN-SUFFIX,union.baidu.com,REJECT
 DOMAIN-SUFFIX,mobads.baidu.com,REJECT
 DOMAIN-SUFFIX,mobads-logs.baidu.com,REJECT
+DOMAIN-SUFFIX,feed-image.baidu.com,REJECT
 
 # 阿里百川 / 喵街广告
 DOMAIN-SUFFIX,adash.m.taobao.com,REJECT
@@ -234,6 +235,7 @@ DOMAIN-SUFFIX,feitian001.com,REJECT
 DOMAIN-SUFFIX,feixin2.com,REJECT
 DOMAIN-SUFFIX,flashtalking.com,REJECT
 DOMAIN-SUFFIX,g1.tagtic.cn,REJECT
+DOMAIN-SUFFIX,adlog.tagtic.cn,REJECT
 DOMAIN-SUFFIX,gentags.net,REJECT
 DOMAIN-SUFFIX,glispa.com,REJECT
 DOMAIN-SUFFIX,go-mpulse.net,REJECT
