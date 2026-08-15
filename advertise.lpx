@@ -15,7 +15,7 @@ IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
 # > 爱思助手
 ^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml - reject
 # > NGA论坛
-^https?:\/\/img\.nga\.178\.com\/attachments - reject
+^https?:\/\/img[0-9]{1}\.nga\.178\.com\/attachments - reject
 # > 滴滴青桔
 ^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif) - reject-200
 ^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api - reject-200
@@ -31,4 +31,4 @@ http-response ^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token) script-path=h
 http-response ^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?) script-path=https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js, requires-body=true, tag=AdGuard
 
 [MITM]
-hostname =  pt-starimg.didistatic.com, omgup*.xiaojukeji.com,mobile-api.adguard.org,nga.178.com,list-app-m.i4.cn,oauth.secure.pixiv.net,upos-hz-mirrorakam.akamaized.net
+hostname =  pt-starimg.didistatic.com, omgup*.xiaojukeji.com,mobile-api.adguard.org,img*.nga.178.com,list-app-m.i4.cn,oauth.secure.pixiv.net,upos-hz-mirrorakam.akamaized.net
