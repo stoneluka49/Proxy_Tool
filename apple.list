@@ -1,5 +1,5 @@
 DOMAIN-KEYWORD,apple.com.edgekey.net,ApplePolicy
-DOMAIN-SUFFIX,push.apple.com,ApplePolicy
+DOMAIN-KEYWORD,push.apple.com,ApplePolicy
 DOMAIN-SUFFIX,akadns.net,ApplePolicy
 
 IP-ASN,714,ApplePolicy, no-resolve
