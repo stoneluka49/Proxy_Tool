@@ -32,7 +32,7 @@ DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net,DIRECT
 # NGA
 # ==================================================
 
-DOMAIN-SUFFIX,nga.178.com,DIRECT
+DOMAIN,img4.nga.178.com,DIRECT
 
 # ==================================================
 # 工具与服务
