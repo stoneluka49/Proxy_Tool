@@ -65,11 +65,11 @@ DOMAIN-SUFFIX,adash.m.taobao.com,REJECT
 DOMAIN-SUFFIX,adashbc.ut.taobao.com,REJECT
 DOMAIN-SUFFIX,munion.m.taobao.com,REJECT
 
-# 微博 / 快手广告
+# 微博 / NGA/ 快手广告
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
 DOMAIN-SUFFIX,beacon.sina.com.cn,REJECT
 DOMAIN-SUFFIX,e.kuaishou.com,REJECT
-
+DOMAIN,img4.nga.178.com,REJECT
 # 小米 / 华为 / TV 端开屏广告
 DOMAIN-SUFFIX,ad.xiaomi.com,REJECT
 DOMAIN-SUFFIX,ad.mi.com,REJECT
