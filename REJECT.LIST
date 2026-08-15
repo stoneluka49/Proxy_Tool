@@ -69,7 +69,7 @@ DOMAIN-SUFFIX,munion.m.taobao.com,REJECT
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
 DOMAIN-SUFFIX,beacon.sina.com.cn,REJECT
 DOMAIN-SUFFIX,e.kuaishou.com,REJECT
-DOMAIN,img4.nga.178.com,REJECT
+
 # 小米 / 华为 / TV 端开屏广告
 DOMAIN-SUFFIX,ad.xiaomi.com,REJECT
 DOMAIN-SUFFIX,ad.mi.com,REJECT
