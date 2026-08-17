@@ -2,6 +2,9 @@ DOMAIN-KEYWORD,apple.com.edgekey.net,ApplePolicy
 DOMAIN-SUFFIX,push.apple.com,ApplePolicy
 DOMAIN-SUFFIX,akadns.net,ApplePolicy
 
+IP-CIDR,17.248.216.0/21,🍎 Apple,no-resolve
+IP-CIDR,17.32.128.0/17,🍎 Apple,no-resolve
+
 IP-ASN,714,ApplePolicy, no-resolve
 IP-ASN,6185,ApplePolicy, no-resolve
 IP-ASN,2709,ApplePolicy, no-resolve
