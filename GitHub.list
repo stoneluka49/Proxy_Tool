@@ -1,1 +1,15 @@
+# ==================================================
+# 🐙 GitHub
+# ==================================================
+
+# GitHub Core
+DOMAIN-SUFFIX,github.com,🐙 GitHub
+DOMAIN-SUFFIX,githubusercontent.com,🐙 GitHub
+DOMAIN-SUFFIX,githubassets.com,🐙 GitHub
+
+# GitHub Pages
+DOMAIN-SUFFIX,github.io,🐙 GitHub
+
+# GitHub Packages
+DOMAIN-SUFFIX,ghcr.io,🐙 GitHub
 
