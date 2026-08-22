@@ -64,8 +64,9 @@ DOMAIN-SUFFIX,feed-image.baidu.com,REJECT
 DOMAIN-SUFFIX,adash.m.taobao.com,REJECT
 DOMAIN-SUFFIX,adashbc.ut.taobao.com,REJECT
 DOMAIN-SUFFIX,munion.m.taobao.com,REJECT
+DOMAIN,h-adashx.ut.taobao.com,REJECT
 
-# 微博 / NGA/ 快手广告
+# 微博 / 快手广告
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
 DOMAIN-SUFFIX,beacon.sina.com.cn,REJECT
 DOMAIN-SUFFIX,e.kuaishou.com,REJECT
