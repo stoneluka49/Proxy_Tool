@@ -627,19 +627,16 @@ DOMAIN-SUFFIX,zemanta.com,REJECT
 DOMAIN-SUFFIX,unityads.unity3d.com,REJECT
 DOMAIN-SUFFIX,ads.unity3d.com,REJECT
 
-# ironSource / AppLovin / Vungle / Chartboost
+# ironSource / Vungle / Chartboost
 DOMAIN-SUFFIX,ironsrc.com,REJECT
 DOMAIN-SUFFIX,ironsrc.mobi,REJECT
 DOMAIN-SUFFIX,supersonicads-a.akamaihd.net,REJECT
 DOMAIN-SUFFIX,events3alt.adcolony.com,REJECT
-DOMAIN-SUFFIX,applovin.com,REJECT
 DOMAIN-SUFFIX,vungle.cn,REJECT
 DOMAIN-SUFFIX,vungle.com,REJECT
 DOMAIN-SUFFIX,chartboost.com,REJECT
 
-# 归因与行为追踪 (AppsFlyer / Adjust / Kochava / Branch / Tapjoy)
-DOMAIN-SUFFIX,appsflyer.com,REJECT
-DOMAIN-SUFFIX,appsflyersdk.com,REJECT
+# 归因与行为追踪 ( Adjust / Kochava / Branch / Tapjoy)
 DOMAIN-SUFFIX,adjust.com,REJECT
 DOMAIN-SUFFIX,adjust.io,REJECT
 DOMAIN-SUFFIX,adjust.world,REJECT
