@@ -1,1 +1,29 @@
+# ==================================================
+# 🤖 OpenAI / ChatGPT
+# ==================================================
 
+# --- OpenAI Core ---
+DOMAIN-SUFFIX,openai.com,🤖 OpenAI
+DOMAIN-SUFFIX,chatgpt.com,🤖 OpenAI
+
+# --- OpenAI CDN / Content ---
+DOMAIN-SUFFIX,oaistatic.com,🤖 OpenAI
+DOMAIN-SUFFIX,oaiusercontent.com,🤖 OpenAI
+DOMAIN-SUFFIX,openaimerge.com,🤖 OpenAI
+
+# --- OpenAI Feature / Experiment ---
+DOMAIN-SUFFIX,statsig.com,🤖 OpenAI
+DOMAIN-SUFFIX,statsigapi.net,🤖 OpenAI
+DOMAIN-SUFFIX,featuregates.org,🤖 OpenAI
+DOMAIN-SUFFIX,featureassets.org,🤖 OpenAI
+
+# --- ChatGPT Support / Authentication ---
+DOMAIN-SUFFIX,workos.com,🤖 OpenAI
+DOMAIN-SUFFIX,workoscdn.com,🤖 OpenAI
+
+# --- ChatGPT Sentry ---
+DOMAIN-SUFFIX,sentry.io,🤖 OpenAI
+
+# ==================== 订阅支付与内购依赖 ====================
+DOMAIN-SUFFIX,stripe.com,🤖 OpenAI
+DOMAIN-SUFFIX,revenuecat.com,🤖 OpenAI
