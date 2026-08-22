@@ -6,6 +6,9 @@
 # Gemini Web
 DOMAIN-SUFFIX,gemini.google.com,♊ Gemini
 DOMAIN-SUFFIX,gemini.googleusercontent.com,♊ Gemini
+DOMAIN,bard.google.com,♊ Gemini
+DOMAIN,proactivebackend-pa.googleapis.com,♊ Gemini
+DOMAIN-KEYWORD,colab,♊ Gemini
 
 # Gemini API
 DOMAIN-SUFFIX,generativelanguage.googleapis.com,♊ Gemini
