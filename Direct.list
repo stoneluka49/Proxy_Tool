@@ -41,3 +41,4 @@ DOMAIN-SUFFIX,app.localhost.direct,DIRECT
 # ==================================================
 
 DOMAIN-SUFFIX,apis.apple.map.fastly.net,DIRECT
+DOMAIN-SUFFIX,ls.apple.com,DIRECT
