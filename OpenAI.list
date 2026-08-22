@@ -24,6 +24,4 @@ DOMAIN-SUFFIX,workoscdn.com,🤖 OpenAI
 # --- ChatGPT Sentry ---
 DOMAIN-SUFFIX,sentry.io,🤖 OpenAI
 
-# ==================== 订阅支付与内购依赖 ====================
-DOMAIN-SUFFIX,stripe.com,🤖 OpenAI
-DOMAIN-SUFFIX,revenuecat.com,🤖 OpenAI
+
