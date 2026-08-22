@@ -1,3 +1,24 @@
+# ==================================================
+# ♊ Gemini / Google 
+# ==================================================
+
+# Gemini Web
+DOMAIN-SUFFIX,gemini.google.com,♊ Gemini
+DOMAIN-SUFFIX,gemini.googleusercontent.com,♊ Gemini
+
+# Gemini API
+DOMAIN-SUFFIX,generativelanguage.googleapis.com,♊ Gemini
+
+# Google AI Studio
+DOMAIN-SUFFIX,aistudio.google.com,♊ Gemini
+
+# Google AI Developer
+DOMAIN-SUFFIX,ai.google.dev,♊ Gemini
+
+# Google DeepMind
+DOMAIN-SUFFIX,deepmind.google,♊ Gemini
+
+# Google 
 DOMAIN-SUFFIX,gmail.com,🔍 Google 服务
 DOMAIN-SUFFIX,googlemail.com,🔍 Google 服务
 DOMAIN-SUFFIX,google.com,🔍 Google 服务
