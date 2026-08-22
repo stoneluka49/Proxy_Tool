@@ -45,12 +45,13 @@ DOMAIN-SUFFIX,byteimg.com,REJECT
 DOMAIN-SUFFIX,ibytedtos.com,REJECT
 DOMAIN-SUFFIX,isnssdk.com,REJECT
 
-# 腾讯优量汇 / 广点通 (GDT) / 微信
+# 腾讯优量汇 / 广点通 (GDT) / 微信/虎牙
 DOMAIN-SUFFIX,e.qq.com,REJECT
 DOMAIN-SUFFIX,gdt.qq.com,REJECT
 DOMAIN-SUFFIX,l.qq.com,REJECT
 DOMAIN-SUFFIX,ugdtimg.com,REJECT
 DOMAIN-SUFFIX,wxs.qq.com,REJECT
+DOMAIN,ylog.huya.com,REJECT
 
 # 百度聚屏 / 百度广告
 DOMAIN-SUFFIX,cpro.baidu.com,REJECT
@@ -65,6 +66,7 @@ DOMAIN-SUFFIX,adash.m.taobao.com,REJECT
 DOMAIN-SUFFIX,adashbc.ut.taobao.com,REJECT
 DOMAIN-SUFFIX,munion.m.taobao.com,REJECT
 DOMAIN,h-adashx.ut.taobao.com,REJECT
+DOMAIN,adashxgc.ut.taobao.com,REJECT
 
 # 微博 / 快手广告
 DOMAIN-SUFFIX,biz.weibo.com,REJECT
