@@ -1,1 +1,19 @@
 
+# ==================================================
+# 💬 Discord
+# ==================================================
+
+# Discord Core
+DOMAIN-SUFFIX,discord.com,💬 Discord
+DOMAIN-SUFFIX,discordapp.com,💬 Discord
+
+# Invite / Link
+DOMAIN-SUFFIX,discord.gg,💬 Discord
+
+# CDN / Media
+DOMAIN-SUFFIX,cdn.discordapp.com,💬 Discord
+DOMAIN-SUFFIX,media.discord.net,💬 Discord
+DOMAIN-SUFFIX,media.discordapp.net,💬 Discord
+
+# Voice / Video
+DOMAIN-SUFFIX,discord.media,💬 Discord
