@@ -76,6 +76,7 @@ DOMAIN-SUFFIX,ad.xiaomi.com,REJECT
 DOMAIN-SUFFIX,ad.mi.com,REJECT
 DOMAIN-SUFFIX,adfile.avicno.com,REJECT
 DOMAIN-SUFFIX,metrics.icloud.com.cn,REJECT
+DOMAIN,metrics.icloud.com,REJECT
 
 # ==================== 3. 基础广告联盟 - 国内 ====================
 DOMAIN-SUFFIX,09mk.cn,REJECT
