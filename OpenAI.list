@@ -17,10 +17,6 @@ DOMAIN-SUFFIX,statsigapi.net,🤖 OpenAI
 DOMAIN-SUFFIX,featuregates.org,🤖 OpenAI
 DOMAIN-SUFFIX,featureassets.org,🤖 OpenAI
 
-# --- ChatGPT Support / Authentication ---
-DOMAIN-SUFFIX,workos.com,🤖 OpenAI
-DOMAIN-SUFFIX,workoscdn.com,🤖 OpenAI
-
 # --- ChatGPT Sentry ---
 DOMAIN-SUFFIX,sentry.io,🤖 OpenAI
 
