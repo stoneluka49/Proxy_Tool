@@ -52,6 +52,8 @@ DOMAIN-SUFFIX,gdt.qq.com,REJECT
 DOMAIN-SUFFIX,l.qq.com,REJECT
 DOMAIN-SUFFIX,ugdtimg.com,REJECT
 DOMAIN,adsmind.gdtimg.com,REJECT
+DOMAIN,pgdt.gtimg.cn,REJECT
+DOMAIN,qzs.gdtimg.com,REJECT
 DOMAIN-SUFFIX,wxs.qq.com,REJECT
 DOMAIN,ylog.huya.com,REJECT
 
