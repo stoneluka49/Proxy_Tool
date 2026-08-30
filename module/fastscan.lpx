@@ -1,7 +1,7 @@
 #!name=快捷搜索
 #!desc=指令快捷搜索
 #!author=stoneluka
-#!icon=https://github.com/Toperlock/Quantumult/raw/main/icon/Doraemon/Doraemon-1063.png
+
 
 [Rewrite]
 # gm - Google 图片
