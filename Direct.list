@@ -42,3 +42,9 @@ DOMAIN-SUFFIX,app.localhost.direct,DIRECT
 
 DOMAIN-SUFFIX,apis.apple.map.fastly.net,DIRECT
 DOMAIN-SUFFIX,ls.apple.com,DIRECT
+
+# ==================================================
+# IP-CIDR
+# ==================================================
+
+IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
