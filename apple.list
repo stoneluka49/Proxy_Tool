@@ -3,6 +3,6 @@ DOMAIN-SUFFIX,push.apple.com,ApplePolicy
 DOMAIN-SUFFIX,akadns.net,ApplePolicy
 
 
-IP-ASN,714,ApplePolicy, no-resolve
-IP-ASN,6185,ApplePolicy, no-resolve
-IP-ASN,2709,ApplePolicy, no-resolve
+IP-ASN,714,ApplePolicy
+IP-ASN,6185,ApplePolicy
+IP-ASN,2709,ApplePolicy
