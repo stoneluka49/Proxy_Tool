@@ -55,3 +55,8 @@ DOMAIN-SUFFIX, huggingface.co, PROXY
 # ==================== 4. 社交媒体与主流外网 ====================
 # Wikipedia
 DOMAIN-SUFFIX, wikipedia.org, PROXY
+
+# ==================== 5. LOON插件域名 ====================
+
+DOMAIN-SUFFIX, kelee.one, PROXY
+DOMAIN,kelvinlab.wuyra.com, PROXY
