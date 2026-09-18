@@ -10,7 +10,7 @@ IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
 
 [Rewrite]
 #**bilibili-腾讯**
-^https:\/\/upos-hz-mirrorakam\.akamaized\.net https://upos-sz-mirrorcos.bilivideo.com 307
+^https:\/\/upos-hz-mirrorakam\.akamaized\.net https://upos-sz-mirrorcos.bilivideo.com 302
 # > 爱思助手
 ^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml - reject
 # > 滴滴青桔
