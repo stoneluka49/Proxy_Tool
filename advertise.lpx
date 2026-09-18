@@ -7,10 +7,10 @@
 # > 滴滴
 IP-CIDR,123.207.209.39/32,REJECT-DROP,no-resolve
 IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
+#美团
+URL-REGEX,"^https?:\/\/(s3plus|flowplus)\.meituan\.net\/v\d\/\w+\/linglong\/\w+\.(gif|jpg|mp4)",REJECT
 
 [Rewrite]
-#**bilibili-腾讯**
-^https:\/\/upos-hz-mirrorakam\.akamaized\.net https://upos-sz-mirrorcos.bilivideo.com 302
 # > 爱思助手
 ^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml - reject
 # > 滴滴青桔
@@ -28,4 +28,4 @@ http-response ^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token) script-path=h
 http-response ^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?) script-path=https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js, requires-body=true, tag=AdGuard
 
 [MITM]
-hostname =  pt-starimg.didistatic.com,omgup*.xiaojukeji.com,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,*.akamaized.net
+hostname =  pt-starimg.didistatic.com,omgup*.xiaojukeji.com,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,flowplus.meituan.net
