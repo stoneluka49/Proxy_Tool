@@ -15,7 +15,7 @@ DOMAIN-KEYWORD,sportsteam,NBA
 # ==================================================
 
 DOMAIN-KEYWORD,bilivideo,DIRECT
-DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net,DIRECT
+#DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net,DIRECT
 
 # ==================================================
 # 工具与服务
