@@ -14,8 +14,11 @@ DOMAIN-KEYWORD,sportsteam,NBA
 # Bilibili
 # ==================================================
 
-DOMAIN-KEYWORD,bilivideo,DIRECT
+DOMAIN-SUFFIX,bilivideo.com,DIRECT
+DOMAIN-SUFFIX,acgvideo.com,DIRECT
+# Bilibili Akamai CDN
 DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net,DIRECT
+DOMAIN-SUFFIX,upos-sz-mirrorakam.akamaized.net,DIRECT
 
 # ==================================================
 # 工具与服务
