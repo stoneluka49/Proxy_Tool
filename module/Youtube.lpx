@@ -1,11 +1,14 @@
-#!author=@怎么肥事@gholts
 #!name=Youtube
 #!desc=适用于 Youtube
+#!author=@怎么肥事@gholts
+
+
 [Argument]
 native_download=switch,"false","true",tag=开启本地下载, desc=解锁YouTube下载功能
-block_games=switch,"true","false",tag=隐藏内置游戏, desc=用于隐藏YouTube游戏服务
-block_store=switch,"true","false",tag=隐藏商品橱窗, desc=用于隐藏YouTube商品推广
-jump_ahead=switch,"true","false",tag=开启精彩跳转, desc=解锁 YouTube Jump Ahead 按钮
+block_games=switch,"false","true",tag=隐藏内置游戏, desc=用于隐藏YouTube游戏服务
+block_store=switch,"false","true",tag=隐藏商品橱窗, desc=用于隐藏YouTube商品推广
+jump_ahead=switch,"false","true",tag=开启精彩跳转, desc=解锁 YouTube Jump Ahead 按钮
+
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
@@ -14,16 +17,15 @@ jump_ahead=switch,"true","false",tag=开启精彩跳转, desc=解锁 YouTube Jum
 ^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext - reject-200
 
 [Script]
-
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.response.js, requires-body=true, binary-body-mode=true, timeout=60, tag=youtube.response
 
 http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/offline\/get_download_action(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.download, argument={${native_download}}
 
 http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.download-player, argument={${native_download}}
 
-http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:navigation\/resolve_url|browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config)(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.response, argument={${block_upload}, ${block_shorts}, ${block_games}, ${block_vertical_live}, ${jump_ahead}, ${auto_hd}, ${block_store}}
+http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:navigation\/resolve_url|browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config)(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.response, argument="{${block_upload}, ${block_shorts}, ${block_games}, ${block_vertical_live}, ${jump_ahead}, ${auto_hd}, ${block_store}}"
 
-http-response ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.ump, argument={${block_games}, ${block_vertical_live}, ${jump_ahead}, ${auto_hd}, ${block_store}}
+http-response ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.ump, argument="{${block_games}, ${block_vertical_live}, ${jump_ahead}, ${auto_hd}, ${block_store}}"
 
 http-request ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.init
 
