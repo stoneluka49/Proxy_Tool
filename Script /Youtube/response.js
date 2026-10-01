@@ -70,8 +70,6 @@ SOFTWARE.
             const options = readOptions({
                 blockUpload: true,
                 blockShorts: false,
-                blockGames: true,
-                blockStore: true,
             });
             if (options.autoHd !== false)
                 cacheQuality(responsePlayers(type, message));
@@ -94,10 +92,7 @@ SOFTWARE.
             if (!clientKey)
                 throw new Error("YouTubeConfig requires stored clientKey");
             if (!$response.body) throw new Error("YouTubeConfig requires body");
-            const options = readOptions({ 
-                blockGames: true,
-                blockStore: true,
-            });
+            const options = readOptions({ blockGames: true });
             const result = transformUmp(
                 $response.body,
                 decodeBase64(clientKey),
@@ -265,6 +260,7 @@ SOFTWARE.
         "full_width_square_image_layout.eml-fe",
         "video_display_full_buttoned_layout.eml-fe",
     ]);
+    // Match active shopping components, not product words in titles or URLs.
     const SHOPPING_LAYOUT =
         /^(?:shopping_|products?_in_video_)[a-z0-9_]+\.eml(?:-js)?(?:-fe)?$/;
     const AD_TRACKING = textEncoder.encode("/pagead/");
@@ -349,8 +345,8 @@ SOFTWARE.
                     (field) =>
                         field.wire === 2 &&
                         (containsMarker(field.data) ||
-                            (blockStore && field.no === 400157044) ||
-                            field.no === 455507059 ||
+                            (blockStore && field.no === 400157044) || // Product overlay.
+                            field.no === 455507059 || // Paid-promotion overlay.
                             (blockVerticalLive &&
                                 field.no === 519005951 &&
                                 containsMarker(field.data, LIVE_BADGE)) ||
@@ -419,12 +415,16 @@ SOFTWARE.
                 );
                 changed = keep.length !== object.attachments.length || changed;
                 object.attachments = keep;
+                // The expansion-state key otherwise keeps an empty attachment
+                // area alive, including responses stripped by an older script.
                 if (!keep.length && object.attachmentStateKey !== undefined) {
                     delete object.attachmentStateKey;
                     changed = true;
                 }
             }
         });
+        // Remove only wrappers emptied by filtering, not pre-existing placeholders
+        // or ordinary videos whose shopping attachment was removed.
         function emptyContainer(object) {
             if (!object || typeof object !== "object") return false;
             if (emptied.has(object)) return true;
@@ -470,10 +470,15 @@ SOFTWARE.
     function unlockJumpAhead(button) {
         let changed = false;
         const controller = button.controller;
+        // smart_skip_button.eml selects a promo placeholder when field 7 is
+        // true, and the client's timely_action button when false. Keep every
+        // timing, gesture, entity binding and native seek action unchanged.
         if (controller?.promotionMode === true) {
             controller.promotionMode = false;
             changed = true;
         }
+        // The client checks both total and per-action display counters. Use
+        // YouTube's existing unlimited sentinel without resetting client state.
         if (button.actions?.items?.length)
             for (const target of [button, ...button.actions.items]) {
                 if (target.displayLimit === 0x7fffffff) continue;
@@ -497,6 +502,7 @@ SOFTWARE.
     }
     function unlockSpeedMenu(bytes) {
         const upsell = textEncoder.encode("PApremium_upsell");
+        // Overflow item → inline panel → playback-rate selector model (1602).
         return rewriteBinaryPath(
             bytes,
             [
@@ -515,7 +521,7 @@ SOFTWARE.
                     maximum.data.byteOffset,
                     4,
                 ).getFloat32(0, true);
-                if (!(rate > 0)) return selector;
+                if (!(rate > 0)) return selector; // Keep disabled/live controls disabled.
                 const limit = new Uint8Array(4);
                 new DataView(limit.buffer).setFloat32(
                     0,
@@ -529,6 +535,8 @@ SOFTWARE.
                             : field.raw,
                     ),
                 );
+                // Presets already contain the real rate action; field 3 overrides it
+                // with the Premium panel. Remove only that preset-specific override.
                 return rewriteBinaryPath(expanded, [10, 1674], (preset) =>
                     concatBytes(
                         wireFields(preset)
@@ -668,6 +676,7 @@ SOFTWARE.
             command.offlineVideo
         )
             return false;
+        // Only the observed upsell path. Leave other download actions alone.
         const params = wireFields(decodeBase64(decodeURIComponent(gate.params)));
         if (
             !params.some(
@@ -682,10 +691,14 @@ SOFTWARE.
         if (command.tracking?.length) {
             const type = codec("DownloadTracking"),
                 tracking = type.fromBinary(command.tracking);
+            // Native availability action: retain this response's event data,
+            // changing only the element index/type observed in the capture.
             tracking.index = 1;
             tracking.visualElement = 7111;
             renderer.tracking = type.toBinary(tracking);
         }
+        // Native ACTION_ADD from the Indonesia capture. No media fetches,
+        // country override, persistent state, or server-license fabrication.
         command.executor = {
             commands: [
                 {
@@ -695,8 +708,8 @@ SOFTWARE.
                         action: 1,
                         offlineability: { renderer },
                         actionParams: {
-                            formatType: gate.formatType || 2,
-                            settingsAction: 4,
+                            formatType: gate.formatType || 2, // HD/720p if unset.
+                            settingsAction: 4, // Captured native settings action.
                         },
                     },
                 },
@@ -707,6 +720,7 @@ SOFTWARE.
     }
 
     // 3. Protobuf schema.
+    // Editable protobuf fields. Everything not declared here remains opaque.
     const schema = {
         DownloadAction: [[2, "command", "DownloadCommand"]],
         DownloadCommand: [
@@ -980,6 +994,7 @@ SOFTWARE.
     };
 
     // 4. Lossless protobuf and byte helpers.
+    // Binary editing: decode only declared fields; preserve every other byte.
     const wireState = Symbol("wireState");
     function concatBytes(chunks) {
         const result = new Uint8Array(chunks.reduce((n, b) => n + b.length, 0));
@@ -1087,6 +1102,7 @@ SOFTWARE.
             const [, name, kind, repeated] = spec;
             if (field.wire !== (kind === "bool" || kind === "uint" ? 0 : 2))
                 continue;
+            // A changed cardinality is opaque, rather than silently dropping occurrences.
             if (opaqueNames.has(name)) continue;
             if (!repeated && Object.hasOwn(message, name)) {
                 for (const previous of fields)
@@ -1174,6 +1190,7 @@ SOFTWARE.
         return message[wireState]?.fields.filter((field) => !field.spec) ?? [];
     }
 
+    // Edit a declared binary path; keep all siblings and repeated occurrences.
     function rewriteBinaryPath(bytes, path, transform) {
         if (!path.length) return transform(bytes);
         let changed = false;
@@ -1373,6 +1390,7 @@ SOFTWARE.
     }
 
     // 6. Vendored fflate / noble primitives. Initialized only for UMP traffic.
+    // Keep these algorithms isolated from application policy; licenses above.
     function createUmpPrimitives() {
         // Gzip
         var u8 = Uint8Array,
@@ -1380,11 +1398,11 @@ SOFTWARE.
             i32 = Int32Array,
             fleb = new u8([
                 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4,
-                4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0,
+                4, 4, 4, 5, 5, 5, 5, 0 /* unused */, 0, 0 /* impossible */, 0,
             ]),
             fdeb = new u8([
                 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9,
-                9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0,
+                9, 10, 10, 11, 11, 12, 12, 13, 13 /* unused */, 0, 0,
             ]),
             clim = new u8([
                 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1,
@@ -1451,10 +1469,10 @@ SOFTWARE.
             fdt = new u8(32);
         for (i = 0; i < 32; ++i) fdt[i] = 5;
         var i,
-            flm = hMap(flt, 9, 0),
-            flrm = hMap(flt, 9, 1),
-            fdm = hMap(fdt, 5, 0),
-            fdrm = hMap(fdt, 5, 1),
+            flm = /* @__PURE__ */ hMap(flt, 9, 0),
+            flrm = /* @__PURE__ */ hMap(flt, 9, 1),
+            fdm = /* @__PURE__ */ hMap(fdt, 5, 0),
+            fdrm = /* @__PURE__ */ hMap(fdt, 5, 1),
             max = function (a) {
                 for (var m2 = a[0], i = 1; i < a.length; ++i)
                     a[i] > m2 && (m2 = a[i]);
@@ -1495,6 +1513,7 @@ SOFTWARE.
                 "filename too long",
                 "stream finishing",
                 "invalid zip data",
+                // determined by unknown compression method
             ],
             err = function (ind, msg, nt2) {
                 var e = new Error(msg || ec[ind]);
@@ -1914,11 +1933,11 @@ SOFTWARE.
                 }
                 return (wbits16(out, p2, lm[256]), p2 + ll[256]);
             },
-            deo = new i32([
+            deo = /* @__PURE__ */ new i32([
                 65540, 131080, 131088, 131104, 262176, 1048704, 1048832,
                 2114560, 2117632,
             ]),
-            et2 = new u8(0),
+            et2 = /* @__PURE__ */ new u8(0),
             dflt = function (dat, lvl, plvl, pre, post, st2) {
                 var s = st2.z || dat.length,
                     o = new u8(pre + s + 5 * (1 + Math.ceil(s / 7e3)) + post),
@@ -2075,7 +2094,7 @@ SOFTWARE.
                 }
                 return slc(o, 0, pre + shft(pos) + post);
             },
-            crct = (function () {
+            crct = /* @__PURE__ */ (function () {
                 for (var t = new Int32Array(256), i = 0; i < 256; ++i) {
                     for (var c = i, k = 9; --k; )
                         c = (c & 1 && -306674912) ^ (c >>> 1);
@@ -2198,7 +2217,603 @@ SOFTWARE.
             );
         }
 
-        return { gzipSync, gunzipSync };
+        // Cipher helpers
+        /*! noble-ciphers - MIT License (c) 2023 Paul Miller (paulmillr.com) */
+        function isBytes(a) {
+            return (
+                a instanceof Uint8Array ||
+                (ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array")
+            );
+        }
+        function abytes(b, ...lengths) {
+            if (!isBytes(b)) throw new Error("Uint8Array expected");
+            if (lengths.length > 0 && !lengths.includes(b.length))
+                throw new Error(
+                    "Uint8Array expected of length " +
+                        lengths +
+                        ", got length=" +
+                        b.length,
+                );
+        }
+        function u82(arr) {
+            return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
+        }
+        function u32(arr) {
+            return new Uint32Array(
+                arr.buffer,
+                arr.byteOffset,
+                Math.floor(arr.byteLength / 4),
+            );
+        }
+        function clean(...arrays) {
+            for (let i = 0; i < arrays.length; i++) arrays[i].fill(0);
+        }
+        var isLE =
+            new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
+        function overlapBytes(a, b) {
+            return (
+                a.buffer === b.buffer && // best we can do, may fail with an obscure Proxy
+                a.byteOffset < b.byteOffset + b.byteLength && // a starts before b end
+                b.byteOffset < a.byteOffset + a.byteLength
+            );
+        }
+        function complexOverlapBytes(input, output) {
+            if (
+                overlapBytes(input, output) &&
+                input.byteOffset < output.byteOffset
+            )
+                throw new Error(
+                    "complex overlap of input and output is not supported",
+                );
+        }
+        var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
+            function wrappedCipher(key, ...args) {
+                if ((abytes(key), !isLE))
+                    throw new Error(
+                        "Non little-endian hardware is not yet supported",
+                    );
+                if (params.nonceLength !== void 0) {
+                    let nonce = args[0];
+                    if (!nonce) throw new Error("nonce / iv required");
+                    params.varSizeNonce
+                        ? abytes(nonce)
+                        : abytes(nonce, params.nonceLength);
+                }
+                let tagl = params.tagLength;
+                tagl && args[1] !== void 0 && abytes(args[1]);
+                let cipher = constructor(key, ...args),
+                    checkOutput = (fnLength, output) => {
+                        if (output !== void 0) {
+                            if (fnLength !== 2)
+                                throw new Error("cipher output not supported");
+                            abytes(output);
+                        }
+                    },
+                    called = !1;
+                return {
+                    encrypt(data, output) {
+                        if (called)
+                            throw new Error(
+                                "cannot encrypt() twice with same key + nonce",
+                            );
+                        return (
+                            (called = !0),
+                            abytes(data),
+                            checkOutput(cipher.encrypt.length, output),
+                            cipher.encrypt(data, output)
+                        );
+                    },
+                    decrypt(data, output) {
+                        if ((abytes(data), tagl && data.length < tagl))
+                            throw new Error(
+                                "invalid ciphertext length: smaller than tagLength=" +
+                                    tagl,
+                            );
+                        return (
+                            checkOutput(cipher.decrypt.length, output),
+                            cipher.decrypt(data, output)
+                        );
+                    },
+                };
+            }
+            return (Object.assign(wrappedCipher, params), wrappedCipher);
+        };
+        function getOutput(expectedLength, out, onlyAligned = !0) {
+            if (out === void 0) return new Uint8Array(expectedLength);
+            if (out.length !== expectedLength)
+                throw new Error(
+                    "invalid output length, expected " +
+                        expectedLength +
+                        ", got: " +
+                        out.length,
+                );
+            if (onlyAligned && !isAligned32(out))
+                throw new Error("invalid output, must be aligned");
+            return out;
+        }
+        function isAligned32(bytes) {
+            return bytes.byteOffset % 4 === 0;
+        }
+        function copyBytes(bytes) {
+            return Uint8Array.from(bytes);
+        }
+
+        // AES-CTR
+        var BLOCK_SIZE = 16,
+            BLOCK_SIZE32 = 4;
+        var POLY = 283;
+        function mul2(n) {
+            return (n << 1) ^ (POLY & -(n >> 7));
+        }
+        function mul(a, b) {
+            let res = 0;
+            for (; b > 0; b >>= 1) ((res ^= a & -(b & 1)), (a = mul2(a)));
+            return res;
+        }
+        var sbox = /* @__PURE__ */ (() => {
+            let t = new Uint8Array(256);
+            for (let i = 0, x2 = 1; i < 256; i++, x2 ^= mul2(x2)) t[i] = x2;
+            let box = new Uint8Array(256);
+            box[0] = 99;
+            for (let i = 0; i < 255; i++) {
+                let x2 = t[255 - i];
+                ((x2 |= x2 << 8),
+                    (box[t[i]] =
+                        (x2 ^
+                            (x2 >> 4) ^
+                            (x2 >> 5) ^
+                            (x2 >> 6) ^
+                            (x2 >> 7) ^
+                            99) &
+                        255));
+            }
+            return (clean(t), box);
+        })();
+        var rotr32_8 = (n) => (n << 24) | (n >>> 8),
+            rotl32_8 = (n) => (n << 8) | (n >>> 24);
+        function genTtable(sbox2, fn2) {
+            if (sbox2.length !== 256) throw new Error("Wrong sbox length");
+            let T0 = new Uint32Array(256).map((_2, j) => fn2(sbox2[j])),
+                T1 = T0.map(rotl32_8),
+                T2 = T1.map(rotl32_8),
+                T3 = T2.map(rotl32_8),
+                T01 = new Uint32Array(256 * 256),
+                T23 = new Uint32Array(256 * 256),
+                sbox22 = new Uint16Array(256 * 256);
+            for (let i = 0; i < 256; i++)
+                for (let j = 0; j < 256; j++) {
+                    let idx = i * 256 + j;
+                    ((T01[idx] = T0[i] ^ T1[j]),
+                        (T23[idx] = T2[i] ^ T3[j]),
+                        (sbox22[idx] = (sbox2[i] << 8) | sbox2[j]));
+                }
+            return { sbox: sbox2, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
+        }
+        var tableEncoding = /* @__PURE__ */ genTtable(
+            sbox,
+            (s) => (mul(s, 3) << 24) | (s << 16) | (s << 8) | mul(s, 2),
+        );
+        var xPowers = /* @__PURE__ */ (() => {
+            let p2 = new Uint8Array(16);
+            for (let i = 0, x2 = 1; i < 16; i++, x2 = mul2(x2)) p2[i] = x2;
+            return p2;
+        })();
+        function expandKeyLE(key) {
+            abytes(key);
+            let len = key.length;
+            if (![16, 24, 32].includes(len))
+                throw new Error(
+                    "aes: invalid key size, should be 16, 24 or 32, got " + len,
+                );
+            let { sbox2 } = tableEncoding,
+                toClean = [];
+            isAligned32(key) || toClean.push((key = copyBytes(key)));
+            let k32 = u32(key),
+                Nk = k32.length,
+                subByte = (n) => applySbox(sbox2, n, n, n, n),
+                xk = new Uint32Array(len + 28);
+            xk.set(k32);
+            for (let i = Nk; i < xk.length; i++) {
+                let t = xk[i - 1];
+                (i % Nk === 0
+                    ? (t = subByte(rotr32_8(t)) ^ xPowers[i / Nk - 1])
+                    : Nk > 6 && i % Nk === 4 && (t = subByte(t)),
+                    (xk[i] = xk[i - Nk] ^ t));
+            }
+            return (clean(...toClean), xk);
+        }
+        function apply0123(T01, T23, s0, s1, s2, s3) {
+            return (
+                T01[((s0 << 8) & 65280) | ((s1 >>> 8) & 255)] ^
+                T23[((s2 >>> 8) & 65280) | ((s3 >>> 24) & 255)]
+            );
+        }
+        function applySbox(sbox2, s0, s1, s2, s3) {
+            return (
+                sbox2[(s0 & 255) | (s1 & 65280)] |
+                (sbox2[((s2 >>> 16) & 255) | ((s3 >>> 16) & 65280)] << 16)
+            );
+        }
+        function encrypt(xk, s0, s1, s2, s3) {
+            let { sbox2, T01, T23 } = tableEncoding,
+                k = 0;
+            ((s0 ^= xk[k++]),
+                (s1 ^= xk[k++]),
+                (s2 ^= xk[k++]),
+                (s3 ^= xk[k++]));
+            let rounds = xk.length / 4 - 2;
+            for (let i = 0; i < rounds; i++) {
+                let t02 = xk[k++] ^ apply0123(T01, T23, s0, s1, s2, s3),
+                    t12 = xk[k++] ^ apply0123(T01, T23, s1, s2, s3, s0),
+                    t22 = xk[k++] ^ apply0123(T01, T23, s2, s3, s0, s1),
+                    t32 = xk[k++] ^ apply0123(T01, T23, s3, s0, s1, s2);
+                ((s0 = t02), (s1 = t12), (s2 = t22), (s3 = t32));
+            }
+            let t0 = xk[k++] ^ applySbox(sbox2, s0, s1, s2, s3),
+                t1 = xk[k++] ^ applySbox(sbox2, s1, s2, s3, s0),
+                t2 = xk[k++] ^ applySbox(sbox2, s2, s3, s0, s1),
+                t3 = xk[k++] ^ applySbox(sbox2, s3, s0, s1, s2);
+            return { s0: t0, s1: t1, s2: t2, s3: t3 };
+        }
+        function ctrCounter(xk, nonce, src, dst) {
+            (abytes(nonce, BLOCK_SIZE), abytes(src));
+            let srcLen = src.length;
+            ((dst = getOutput(srcLen, dst)), complexOverlapBytes(src, dst));
+            let ctr2 = nonce,
+                c32 = u32(ctr2),
+                { s0, s1, s2, s3 } = encrypt(
+                    xk,
+                    c32[0],
+                    c32[1],
+                    c32[2],
+                    c32[3],
+                ),
+                src32 = u32(src),
+                dst32 = u32(dst);
+            for (let i = 0; i + 4 <= src32.length; i += 4) {
+                ((dst32[i + 0] = src32[i + 0] ^ s0),
+                    (dst32[i + 1] = src32[i + 1] ^ s1),
+                    (dst32[i + 2] = src32[i + 2] ^ s2),
+                    (dst32[i + 3] = src32[i + 3] ^ s3));
+                let carry = 1;
+                for (let i2 = ctr2.length - 1; i2 >= 0; i2--)
+                    ((carry = (carry + (ctr2[i2] & 255)) | 0),
+                        (ctr2[i2] = carry & 255),
+                        (carry >>>= 8));
+                ({ s0, s1, s2, s3 } = encrypt(
+                    xk,
+                    c32[0],
+                    c32[1],
+                    c32[2],
+                    c32[3],
+                ));
+            }
+            let start = BLOCK_SIZE * Math.floor(src32.length / BLOCK_SIZE32);
+            if (start < srcLen) {
+                let b32 = new Uint32Array([s0, s1, s2, s3]),
+                    buf = u82(b32);
+                for (let i = start, pos = 0; i < srcLen; i++, pos++)
+                    dst[i] = src[i] ^ buf[pos];
+                clean(b32);
+            }
+            return dst;
+        }
+        var ctr = /* @__PURE__ */ wrapCipher(
+            { blockSize: 16, nonceLength: 16 },
+            function (key, nonce) {
+                function processCtr(buf, dst) {
+                    if (
+                        (abytes(buf),
+                        dst !== void 0 && (abytes(dst), !isAligned32(dst)))
+                    )
+                        throw new Error("unaligned destination");
+                    let xk = expandKeyLE(key),
+                        n = copyBytes(nonce),
+                        toClean = [xk, n];
+                    isAligned32(buf) || toClean.push((buf = copyBytes(buf)));
+                    let out = ctrCounter(xk, n, buf, dst);
+                    return (clean(...toClean), out);
+                }
+                return {
+                    encrypt: (plaintext, dst) => processCtr(plaintext, dst),
+                    decrypt: (ciphertext, dst) => processCtr(ciphertext, dst),
+                };
+            },
+        );
+
+        // Hash helpers
+        /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+        function isBytes2(a) {
+            return (
+                a instanceof Uint8Array ||
+                (ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array")
+            );
+        }
+        function anumber(n) {
+            if (!Number.isSafeInteger(n) || n < 0)
+                throw new Error("positive integer expected, got " + n);
+        }
+        function abytes2(b, ...lengths) {
+            if (!isBytes2(b)) throw new Error("Uint8Array expected");
+            if (lengths.length > 0 && !lengths.includes(b.length))
+                throw new Error(
+                    "Uint8Array expected of length " +
+                        lengths +
+                        ", got length=" +
+                        b.length,
+                );
+        }
+        function ahash(h2) {
+            if (typeof h2 != "function" || typeof h2.create != "function")
+                throw new Error("Hash should be wrapped by utils.createHasher");
+            (anumber(h2.outputLen), anumber(h2.blockLen));
+        }
+        function aexists(instance, checkFinished = !0) {
+            if (instance.destroyed)
+                throw new Error("Hash instance has been destroyed");
+            if (checkFinished && instance.finished)
+                throw new Error("Hash#digest() has already been called");
+        }
+        function aoutput(out, instance) {
+            abytes2(out);
+            let min = instance.outputLen;
+            if (out.length < min)
+                throw new Error(
+                    "digestInto() expects output buffer of length at least " +
+                        min,
+                );
+        }
+        function clean2(...arrays) {
+            for (let i = 0; i < arrays.length; i++) arrays[i].fill(0);
+        }
+        function createView2(arr) {
+            return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+        }
+        function rotr(word, shift) {
+            return (word << (32 - shift)) | (word >>> shift);
+        }
+        function utf8ToBytes(str) {
+            if (typeof str != "string") throw new Error("string expected");
+            return new Uint8Array(new TextEncoder().encode(str));
+        }
+        function toBytes(data) {
+            return (
+                typeof data == "string" && (data = utf8ToBytes(data)),
+                abytes2(data),
+                data
+            );
+        }
+        function concatBytes2(...arrays) {
+            let sum = 0;
+            for (let i = 0; i < arrays.length; i++) {
+                let a = arrays[i];
+                (abytes2(a), (sum += a.length));
+            }
+            let res = new Uint8Array(sum);
+            for (let i = 0, pad = 0; i < arrays.length; i++) {
+                let a = arrays[i];
+                (res.set(a, pad), (pad += a.length));
+            }
+            return res;
+        }
+        var Hash = class {};
+        function createHasher(hashCons) {
+            let hashC = (msg) => hashCons().update(toBytes(msg)).digest(),
+                tmp = hashCons();
+            return (
+                (hashC.outputLen = tmp.outputLen),
+                (hashC.blockLen = tmp.blockLen),
+                (hashC.create = () => hashCons()),
+                hashC
+            );
+        }
+
+        // HMAC
+        var HMAC = class extends Hash {
+            constructor(hash, _key) {
+                (super(),
+                    (this.finished = !1),
+                    (this.destroyed = !1),
+                    ahash(hash));
+                let key = toBytes(_key);
+                if (
+                    ((this.iHash = hash.create()),
+                    typeof this.iHash.update != "function")
+                )
+                    throw new Error(
+                        "Expected instance of class which extends utils.Hash",
+                    );
+                ((this.blockLen = this.iHash.blockLen),
+                    (this.outputLen = this.iHash.outputLen));
+                let blockLen = this.blockLen,
+                    pad = new Uint8Array(blockLen);
+                pad.set(
+                    key.length > blockLen
+                        ? hash.create().update(key).digest()
+                        : key,
+                );
+                for (let i = 0; i < pad.length; i++) pad[i] ^= 54;
+                (this.iHash.update(pad), (this.oHash = hash.create()));
+                for (let i = 0; i < pad.length; i++) pad[i] ^= 106;
+                (this.oHash.update(pad), clean2(pad));
+            }
+            update(buf) {
+                return (aexists(this), this.iHash.update(buf), this);
+            }
+            digestInto(out) {
+                (aexists(this),
+                    abytes2(out, this.outputLen),
+                    (this.finished = !0),
+                    this.iHash.digestInto(out),
+                    this.oHash.update(out),
+                    this.oHash.digestInto(out),
+                    this.destroy());
+            }
+            digest() {
+                let out = new Uint8Array(this.oHash.outputLen);
+                return (this.digestInto(out), out);
+            }
+            _cloneInto(to) {
+                to || (to = Object.create(Object.getPrototypeOf(this), {}));
+                let {
+                    oHash,
+                    iHash,
+                    finished,
+                    destroyed,
+                    blockLen,
+                    outputLen,
+                } = this;
+                return (
+                    (to = to),
+                    (to.finished = finished),
+                    (to.destroyed = destroyed),
+                    (to.blockLen = blockLen),
+                    (to.outputLen = outputLen),
+                    (to.oHash = oHash._cloneInto(to.oHash)),
+                    (to.iHash = iHash._cloneInto(to.iHash)),
+                    to
+                );
+            }
+            clone() {
+                return this._cloneInto();
+            }
+            destroy() {
+                ((this.destroyed = !0),
+                    this.oHash.destroy(),
+                    this.iHash.destroy());
+            }
+        };
+
+        // SHA-256
+        class SHA256 extends Hash {
+            constructor() {
+                super();
+                this.blockLen = 64;
+                this.outputLen = 32;
+                this.finished = false;
+                this.destroyed = false;
+                this.buffer = new Uint8Array(64);
+                this.view = createView2(this.buffer);
+                this.bytesProcessed = 0;
+                this.h = new Uint32Array([
+                    1779033703, 3144134277, 1013904242, 2773480762,
+                    1359893119, 2600822924, 528734635, 1541459225
+                ]);
+            }
+            update(data) {
+                aexists(this);
+                data = toBytes(data);
+                let length = data.length;
+                let offset = 0;
+                while (offset < length) {
+                    let rem = this.bytesProcessed % 64;
+                    let amount = Math.min(64 - rem, length - offset);
+                    this.buffer.set(data.subarray(offset, offset + amount), rem);
+                    this.bytesProcessed += amount;
+                    offset += amount;
+                    if (this.bytesProcessed % 64 === 0) {
+                        this.processBlock();
+                    }
+                }
+                return this;
+            }
+            processBlock() {
+                let w = new Uint32Array(64);
+                for (let i = 0; i < 16; i++) w[i] = this.view.getUint32(i * 4, false);
+                for (let i = 16; i < 64; i++) {
+                    let s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                    let s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                    w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                }
+                let [a, b, c, d, e, f, g, h] = this.h;
+                let K = [
+                    1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221,
+                    3624381080, 310598401, 607225278, 1426881987, 1925073988, 2162078206, 2614888103, 3248222580,
+                    3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986,
+                    2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241893,
+                    666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037,
+                    2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344,
+                    430227734, 506209300, 563876556, 679035119, 855842279, 1110333553, 1254581701, 1507682399,
+                    1749673326, 1819256910, 2065188609, 2267652309, 2561422717, 2822185153, 3107256930, 3372255434
+                ];
+                for (let i = 0; i < 64; i++) {
+                    let S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+                    let ch = (e & f) ^ (~e & g);
+                    let temp1 = (h + S1 + ch + K[i] + w[i]) | 0;
+                    let S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+                    let maj = (a & b) ^ (a & c) ^ (b & c);
+                    let temp2 = (S0 + maj) | 0;
+                    h = g; g = f; f = e; e = (d + temp1) | 0;
+                    d = c; c = b; b = a; a = (temp1 + temp2) | 0;
+                }
+                this.h[0] = (this.h[0] + a) | 0; this.h[1] = (this.h[1] + b) | 0;
+                this.h[2] = (this.h[2] + c) | 0; this.h[3] = (this.h[3] + d) | 0;
+                this.h[4] = (this.h[4] + e) | 0; this.h[5] = (this.h[5] + f) | 0;
+                this.h[6] = (this.h[6] + g) | 0; this.h[7] = (this.h[7] + h) | 0;
+            }
+            digestInto(out) {
+                aexists(this);
+                aoutput(out, this);
+                this.finished = true;
+                let rem = this.bytesProcessed % 64;
+                this.buffer[rem] = 128;
+                this.buffer.fill(0, rem + 1);
+                if (rem >= 56) {
+                    this.processBlock();
+                    this.buffer.fill(0);
+                }
+                let bits = this.bytesProcessed * 8;
+                let view = createView2(this.buffer);
+                view.setUint32(60, bits % 0x100000000, false);
+                this.processBlock();
+                let outView = createView2(out);
+                for (let i = 0; i < 8; i++) outView.setUint32(i * 4, this.h[i], false);
+            }
+            digest() {
+                let out = new Uint8Array(32);
+                this.digestInto(out);
+                return out;
+            }
+            destroy() {
+                this.destroyed = true;
+                this.buffer.fill(0);
+                this.h.fill(0);
+            }
+        }
+        const sha256 = createHasher(() => new SHA256());
+
+        // CryptoContext wrapper
+        class CryptoContext {
+            constructor(clientKey) {
+                this.clientKey = clientKey;
+            }
+            decrypt(part) {
+                const iv = new Uint8Array(16);
+                iv.set(part.iv);
+                const hmacKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-hmac-key")).digest();
+                const expectedHmac = new HMAC(sha256, hmacKey).update(part.encryptedContent).digest();
+                if (!sameBytes(expectedHmac, part.hmac)) {
+                    throw new Error("UMP HMAC verification failed");
+                }
+                const cipherKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-encrypt-key")).digest();
+                return ctr(cipherKey, iv).decrypt(part.encryptedContent);
+            }
+            encrypt(plaintext) {
+                const iv = new Uint8Array(16);
+                if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+                    crypto.getRandomValues(iv);
+                } else {
+                    for (let i = 0; i < 16; i++) iv[i] = Math.floor(Math.random() * 256);
+                }
+                const cipherKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-encrypt-key")).digest();
+                const encryptedContent = ctr(cipherKey, copyBytes(iv)).encrypt(plaintext);
+                const hmacKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-hmac-key")).digest();
+                const hmac = new HMAC(sha256, hmacKey).update(encryptedContent).digest();
+                return { encryptedContent, hmac, iv };
+            }
+        }
+
+        return { CryptoContext, gzipSync, gunzipSync };
     }
 
     main();
