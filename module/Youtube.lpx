@@ -3,6 +3,7 @@
 #!desc=适用于 Youtube
 [Argument]
 auto_hd=switch,"true","false",tag=自动最高画质, desc=自动选择YouTube最高画质
+native_download=switch,"false","true",tag=开启本地下载, desc=解锁YouTube下载功能
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
@@ -13,5 +14,7 @@ auto_hd=switch,"true","false",tag=自动最高画质, desc=自动选择YouTube�
 [Script]
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.response.js, requires-body=true, binary-body-mode=true, timeout=60, tag=youtube.response
 http-request ^https?:\/\/[\w-]+\.googlevideo\.com\/videoplayback script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.auto-hd, argument="{"autoHd":{auto_hd}}"
+http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/offline\/get_download_action(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.download, argument="{"nativeDownload":{native_download}}"
+http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.download-player, argument="{"nativeDownload":{native_download}}"
 [MITM]
 hostname = *.googlevideo.com, redirector*.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
