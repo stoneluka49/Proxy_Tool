@@ -1,4 +1,4 @@
-// YouTube response runtime: transport → content policy → lossless wire editing.
+// YouTube response runtime: Content Policy, Ad Blocking & Shorts/Games/Store Removal.
 /*
 Third-party components bundled below use the MIT License.
 
@@ -34,7 +34,7 @@ SOFTWARE.
     const textEncoder = new TextEncoder();
     const utf8 = new TextDecoder("utf-8", { fatal: true });
 
-    // 1. Surge entrypoints. Transforms below never call $done or access storage.
+    // 1. Surge entrypoints.
     const ROUTES = {
         "navigation/resolve_url": ["ResolveUrl", transformNavigation],
         browse: ["Browse", transformContent],
@@ -49,10 +49,12 @@ SOFTWARE.
         config: ["Config", null],
         log_event: ["Config", null],
     };
+
     function main() {
         if ($request.url.includes("/initplayback")) handleUmpResponse();
         else handleApiResponse();
     }
+
     function handleApiResponse() {
         try {
             const endpoint = $request.url
@@ -69,7 +71,9 @@ SOFTWARE.
             }
             const options = readOptions({
                 blockUpload: true,
-                blockShorts: false,
+                blockShorts: true,  // 强制/默认开启屏蔽 Shorts
+                blockGames: true,   // 包含 response.js 的 block_games
+                blockStore: true,   // 包含 response.js 的 block_store
             });
             if (options.autoHd !== false)
                 cacheQuality(responsePlayers(type, message));
@@ -83,6 +87,7 @@ SOFTWARE.
             $done({});
         }
     }
+
     function handleUmpResponse() {
         const platform = platformKey($request),
             status = Number($response.status);
@@ -92,7 +97,7 @@ SOFTWARE.
             if (!clientKey)
                 throw new Error("YouTubeConfig requires stored clientKey");
             if (!$response.body) throw new Error("YouTubeConfig requires body");
-            const options = readOptions({ blockGames: true });
+            const options = readOptions({ blockGames: true, blockStore: true, blockShorts: true });
             const result = transformUmp(
                 $response.body,
                 decodeBase64(clientKey),
@@ -252,7 +257,6 @@ SOFTWARE.
     }
 
     // 2. Content policy and native feature controls.
-    // Ad classification is local to a rendered item, never learned across requests.
     const AD_LAYOUTS = new Set([
         "inline_injection_entrypoint_layout.eml",
         "video_display_button_group_layout.eml-fe",
@@ -260,17 +264,18 @@ SOFTWARE.
         "full_width_square_image_layout.eml-fe",
         "video_display_full_buttoned_layout.eml-fe",
     ]);
-    // Match active shopping components, not product words in titles or URLs.
     const SHOPPING_LAYOUT =
         /^(?:shopping_|products?_in_video_)[a-z0-9_]+\.eml(?:-js)?(?:-fe)?$/;
     const AD_TRACKING = textEncoder.encode("/pagead/");
     const GAME_CARD = textEncoder.encode("mini_game_card.eml");
     const STORE_CARD = textEncoder.encode("shopping_item_card_list.eml");
     const STORE_TAB = textEncoder.encode("store");
+    const SHORTS_TAB = textEncoder.encode("FEshorts");
     const LIVE_BADGE = textEncoder.encode(
         "youtube_outline_experimental/live_24pt",
     );
     const IMMERSIVE_LIVE = textEncoder.encode("immersive_live");
+
     function containsMarker(bytes, marker = AD_TRACKING) {
         outer: for (let i = 0; i <= bytes.length - marker.length; i++) {
             for (let j = 0; j < marker.length; j++)
@@ -297,7 +302,6 @@ SOFTWARE.
         let bytes = unknownFields(lockup).find(
             (field) => field.no === 18 && field.wire === 2,
         )?.data;
-        // Primary tap target only; a channel avatar may link to a different live.
         try {
             for (const no of [
                 4, 169495254, 462702848, 1, 139608561, 50, 7, 3,
@@ -324,6 +328,21 @@ SOFTWARE.
             return false;
         }
     }
+    function isShortsTab(item) {
+        const browseId = item.tabRenderer?.endpoint?.browseEndpoint?.browseId;
+        if (browseId === "FEshorts") return true;
+        const params = item.tabRenderer?.endpoint?.browse?.params;
+        if (!params) return false;
+        try {
+            const target = wireFields(
+                decodeBase64(decodeURIComponent(params)),
+            ).find((field) => field.no === 2 && field.wire === 2);
+            return !!target && sameBytes(target.data, SHORTS_TAB);
+        } catch {
+            return false;
+        }
+    }
+
     function isBlockedItem(item, blockGames, blockVerticalLive, blockStore) {
         let ad = false;
         visitObjects(item, (object) => {
@@ -345,8 +364,8 @@ SOFTWARE.
                     (field) =>
                         field.wire === 2 &&
                         (containsMarker(field.data) ||
-                            (blockStore && field.no === 400157044) || // Product overlay.
-                            field.no === 455507059 || // Paid-promotion overlay.
+                            (blockStore && field.no === 400157044) ||
+                            field.no === 455507059 ||
                             (blockVerticalLive &&
                                 field.no === 519005951 &&
                                 containsMarker(field.data, LIVE_BADGE)) ||
@@ -361,6 +380,7 @@ SOFTWARE.
         });
         return ad;
     }
+
     function transformContent(
         message,
         {
@@ -368,6 +388,7 @@ SOFTWARE.
             blockVerticalLive = false,
             jumpAhead = true,
             blockStore = true,
+            blockShorts = true,
         } = {},
     ) {
         let changed = transformMenus(message);
@@ -381,11 +402,18 @@ SOFTWARE.
                 emptied.add(object);
             if (jumpAhead && object.smartSkipButton)
                 changed = unlockJumpAhead(object.smartSkipButton) || changed;
-            if (blockStore && Array.isArray(object.tabs)) {
-                const keep = object.tabs.filter((tab) => !isStoreTab(tab));
+            
+            // 移除底部/顶部标签中的 Store 和 Shorts 按钮
+            if (Array.isArray(object.tabs)) {
+                const keep = object.tabs.filter((tab) => {
+                    if (blockStore && isStoreTab(tab)) return false;
+                    if (blockShorts && isShortsTab(tab)) return false;
+                    return true;
+                });
                 changed = keep.length !== object.tabs.length || changed;
                 object.tabs = keep;
             }
+
             for (const field of ["richItemContents", "overlays"]) {
                 if (!Array.isArray(object[field])) continue;
                 const keep = object[field].filter(
@@ -415,16 +443,13 @@ SOFTWARE.
                 );
                 changed = keep.length !== object.attachments.length || changed;
                 object.attachments = keep;
-                // The expansion-state key otherwise keeps an empty attachment
-                // area alive, including responses stripped by an older script.
                 if (!keep.length && object.attachmentStateKey !== undefined) {
                     delete object.attachmentStateKey;
                     changed = true;
                 }
             }
         });
-        // Remove only wrappers emptied by filtering, not pre-existing placeholders
-        // or ordinary videos whose shopping attachment was removed.
+
         function emptyContainer(object) {
             if (!object || typeof object !== "object") return false;
             if (emptied.has(object)) return true;
@@ -467,18 +492,14 @@ SOFTWARE.
         prune(message);
         return changed;
     }
+
     function unlockJumpAhead(button) {
         let changed = false;
         const controller = button.controller;
-        // smart_skip_button.eml selects a promo placeholder when field 7 is
-        // true, and the client's timely_action button when false. Keep every
-        // timing, gesture, entity binding and native seek action unchanged.
         if (controller?.promotionMode === true) {
             controller.promotionMode = false;
             changed = true;
         }
-        // The client checks both total and per-action display counters. Use
-        // YouTube's existing unlimited sentinel without resetting client state.
         if (button.actions?.items?.length)
             for (const target of [button, ...button.actions.items]) {
                 if (target.displayLimit === 0x7fffffff) continue;
@@ -502,7 +523,6 @@ SOFTWARE.
     }
     function unlockSpeedMenu(bytes) {
         const upsell = textEncoder.encode("PApremium_upsell");
-        // Overflow item → inline panel → playback-rate selector model (1602).
         return rewriteBinaryPath(
             bytes,
             [
@@ -521,7 +541,7 @@ SOFTWARE.
                     maximum.data.byteOffset,
                     4,
                 ).getFloat32(0, true);
-                if (!(rate > 0)) return selector; // Keep disabled/live controls disabled.
+                if (!(rate > 0)) return selector;
                 const limit = new Uint8Array(4);
                 new DataView(limit.buffer).setFloat32(
                     0,
@@ -535,8 +555,6 @@ SOFTWARE.
                             : field.raw,
                     ),
                 );
-                // Presets already contain the real rate action; field 3 overrides it
-                // with the Premium panel. Remove only that preset-specific override.
                 return rewriteBinaryPath(expanded, [10, 1674], (preset) =>
                     concatBytes(
                         wireFields(preset)
@@ -584,6 +602,8 @@ SOFTWARE.
         }
         return true;
     }
+    
+    // 保留逻辑：清空/拦截 Shorts 内部出现的广告
     function removeShortsAds(message) {
         const keep = message.entries.filter(
             (entry) => !entry.command?.reelWatchEndpoint?.adClientParams?.isAd,
@@ -592,10 +612,12 @@ SOFTWARE.
         message.entries = keep;
         return changed;
     }
+
+    // 过滤左侧/底栏导航 (去除 Shorts 按钮入口)
     function filterGuide(message, parameters) {
         const blocked = new Set(["SPunlimited"]);
         if (parameters.blockUpload) blocked.add("FEuploads");
-        if (parameters.blockShorts) blocked.add("FEshorts");
+        if (parameters.blockShorts) blocked.add("FEshorts"); // 精准过滤 Shorts 导航按键
         let changed = false;
         visitObjects(message, (object) => {
             if (!Array.isArray(object.rendererItems)) return;
@@ -610,6 +632,7 @@ SOFTWARE.
         });
         return changed;
     }
+
     function addPremiumSettings(message) {
         visitObjects(message, (category) => {
             if (category.categoryId !== 10135) return;
@@ -676,7 +699,6 @@ SOFTWARE.
             command.offlineVideo
         )
             return false;
-        // Only the observed upsell path. Leave other download actions alone.
         const params = wireFields(decodeBase64(decodeURIComponent(gate.params)));
         if (
             !params.some(
@@ -691,14 +713,10 @@ SOFTWARE.
         if (command.tracking?.length) {
             const type = codec("DownloadTracking"),
                 tracking = type.fromBinary(command.tracking);
-            // Native availability action: retain this response's event data,
-            // changing only the element index/type observed in the capture.
             tracking.index = 1;
             tracking.visualElement = 7111;
             renderer.tracking = type.toBinary(tracking);
         }
-        // Native ACTION_ADD from the Indonesia capture. No media fetches,
-        // country override, persistent state, or server-license fabrication.
         command.executor = {
             commands: [
                 {
@@ -708,8 +726,8 @@ SOFTWARE.
                         action: 1,
                         offlineability: { renderer },
                         actionParams: {
-                            formatType: gate.formatType || 2, // HD/720p if unset.
-                            settingsAction: 4, // Captured native settings action.
+                            formatType: gate.formatType || 2,
+                            settingsAction: 4,
                         },
                     },
                 },
@@ -719,8 +737,7 @@ SOFTWARE.
         return true;
     }
 
-    // 3. Protobuf schema.
-    // Editable protobuf fields. Everything not declared here remains opaque.
+    // 3. Protobuf Schema
     const schema = {
         DownloadAction: [[2, "command", "DownloadCommand"]],
         DownloadCommand: [
@@ -776,7 +793,7 @@ SOFTWARE.
             [4, "content", "BrowseContent"],
         ],
         TabEndpoint: [[48687626, "browse", "TabBrowseEndpoint"]],
-        TabBrowseEndpoint: [[3, "params", "string"]],
+        TabBrowseEndpoint: [[3, "params", "string"], [1, "browseId", "string"]],
         ElementRenderer: [
             [172660663, "videoRendererContent", "VideoRendererContent"],
         ],
@@ -993,8 +1010,7 @@ SOFTWARE.
         OnesieInnertubeResponse: [[4, "contents", "WatchContent", true]],
     };
 
-    // 4. Lossless protobuf and byte helpers.
-    // Binary editing: decode only declared fields; preserve every other byte.
+    // 4. Protobuf Core Helpers
     const wireState = Symbol("wireState");
     function concatBytes(chunks) {
         const result = new Uint8Array(chunks.reduce((n, b) => n + b.length, 0));
@@ -1102,7 +1118,6 @@ SOFTWARE.
             const [, name, kind, repeated] = spec;
             if (field.wire !== (kind === "bool" || kind === "uint" ? 0 : 2))
                 continue;
-            // A changed cardinality is opaque, rather than silently dropping occurrences.
             if (opaqueNames.has(name)) continue;
             if (!repeated && Object.hasOwn(message, name)) {
                 for (const previous of fields)
@@ -1190,7 +1205,6 @@ SOFTWARE.
         return message[wireState]?.fields.filter((field) => !field.spec) ?? [];
     }
 
-    // Edit a declared binary path; keep all siblings and repeated occurrences.
     function rewriteBinaryPath(bytes, path, transform) {
         if (!path.length) return transform(bytes);
         let changed = false;
@@ -1246,7 +1260,7 @@ SOFTWARE.
         return new Uint8Array(output);
     }
 
-    // 5. UMP framing and encrypted payload transformation.
+    // 5. UMP Reader/Writer Protocols
     class UmpReader {
         constructor(buffer) {
             this.buffer = buffer;
@@ -1288,6 +1302,7 @@ SOFTWARE.
             return this.offset < this.buffer.length;
         }
     }
+
     class UmpWriter {
         constructor(capacity = 1024) {
             this.buffer = new Uint8Array(capacity);
@@ -1343,6 +1358,7 @@ SOFTWARE.
             return this.buffer.subarray(0, this.length);
         }
     }
+
     function transformUmp(body, key, options) {
         const { CryptoContext, gzipSync, gunzipSync } = createUmpPrimitives();
         const crypto = new CryptoContext(key);
@@ -1389,20 +1405,18 @@ SOFTWARE.
         return { body: writer.finish(), players };
     }
 
-    // 6. Vendored fflate / noble primitives. Initialized only for UMP traffic.
-    // Keep these algorithms isolated from application policy; licenses above.
+    // 6. Vendored fflate / noble primitives
     function createUmpPrimitives() {
-        // Gzip
         var u8 = Uint8Array,
             u16 = Uint16Array,
             i32 = Int32Array,
             fleb = new u8([
                 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4,
-                4, 4, 4, 5, 5, 5, 5, 0 /* unused */, 0, 0 /* impossible */, 0,
+                4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0,
             ]),
             fdeb = new u8([
                 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9,
-                9, 10, 10, 11, 11, 12, 12, 13, 13 /* unused */, 0, 0,
+                9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0,
             ]),
             clim = new u8([
                 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1,
@@ -1459,20 +1473,15 @@ SOFTWARE.
             },
             flt = new u8(288);
         for (i = 0; i < 144; ++i) flt[i] = 8;
-        var i;
         for (i = 144; i < 256; ++i) flt[i] = 9;
-        var i;
         for (i = 256; i < 280; ++i) flt[i] = 7;
-        var i;
         for (i = 280; i < 288; ++i) flt[i] = 8;
-        var i,
-            fdt = new u8(32);
+        var fdt = new u8(32);
         for (i = 0; i < 32; ++i) fdt[i] = 5;
-        var i,
-            flm = /* @__PURE__ */ hMap(flt, 9, 0),
-            flrm = /* @__PURE__ */ hMap(flt, 9, 1),
-            fdm = /* @__PURE__ */ hMap(fdt, 5, 0),
-            fdrm = /* @__PURE__ */ hMap(fdt, 5, 1),
+        var flm = hMap(flt, 9, 0),
+            flrm = hMap(flt, 9, 1),
+            fdm = hMap(fdt, 5, 0),
+            fdrm = hMap(fdt, 5, 1),
             max = function (a) {
                 for (var m2 = a[0], i = 1; i < a.length; ++i)
                     a[i] > m2 && (m2 = a[i]);
@@ -1513,7 +1522,6 @@ SOFTWARE.
                 "filename too long",
                 "stream finishing",
                 "invalid zip data",
-                // determined by unknown compression method
             ],
             err = function (ind, msg, nt2) {
                 var e = new Error(msg || ec[ind]);
@@ -1933,11 +1941,11 @@ SOFTWARE.
                 }
                 return (wbits16(out, p2, lm[256]), p2 + ll[256]);
             },
-            deo = /* @__PURE__ */ new i32([
+            deo = new i32([
                 65540, 131080, 131088, 131104, 262176, 1048704, 1048832,
                 2114560, 2117632,
             ]),
-            et2 = /* @__PURE__ */ new u8(0),
+            et2 = new u8(0),
             dflt = function (dat, lvl, plvl, pre, post, st2) {
                 var s = st2.z || dat.length,
                     o = new u8(pre + s + 5 * (1 + Math.ceil(s / 7e3)) + post),
@@ -2094,7 +2102,7 @@ SOFTWARE.
                 }
                 return slc(o, 0, pre + shft(pos) + post);
             },
-            crct = /* @__PURE__ */ (function () {
+            crct = (function () {
                 for (var t = new Int32Array(256), i = 0; i < 256; ++i) {
                     for (var c = i, k = 9; --k; )
                         c = (c & 1 && -306674912) ^ (c >>> 1);
@@ -2217,8 +2225,6 @@ SOFTWARE.
             );
         }
 
-        // Cipher helpers
-        /*! noble-ciphers - MIT License (c) 2023 Paul Miller (paulmillr.com) */
         function isBytes(a) {
             return (
                 a instanceof Uint8Array ||
@@ -2252,8 +2258,8 @@ SOFTWARE.
             new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68;
         function overlapBytes(a, b) {
             return (
-                a.buffer === b.buffer && // best we can do, may fail with an obscure Proxy
-                a.byteOffset < b.byteOffset + b.byteLength && // a starts before b end
+                a.buffer === b.buffer &&
+                a.byteOffset < b.byteOffset + b.byteLength &&
                 b.byteOffset < a.byteOffset + a.byteLength
             );
         }
@@ -2266,7 +2272,7 @@ SOFTWARE.
                     "complex overlap of input and output is not supported",
                 );
         }
-        var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
+        var wrapCipher = (params, constructor) => {
             function wrappedCipher(key, ...args) {
                 if ((abytes(key), !isLE))
                     throw new Error(
@@ -2338,7 +2344,6 @@ SOFTWARE.
             return Uint8Array.from(bytes);
         }
 
-        // AES-CTR
         var BLOCK_SIZE = 16,
             BLOCK_SIZE32 = 4;
         var POLY = 283;
@@ -2350,7 +2355,7 @@ SOFTWARE.
             for (; b > 0; b >>= 1) ((res ^= a & -(b & 1)), (a = mul2(a)));
             return res;
         }
-        var sbox = /* @__PURE__ */ (() => {
+        var sbox = (() => {
             let t = new Uint8Array(256);
             for (let i = 0, x2 = 1; i < 256; i++, x2 ^= mul2(x2)) t[i] = x2;
             let box = new Uint8Array(256);
@@ -2389,11 +2394,11 @@ SOFTWARE.
                 }
             return { sbox: sbox2, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
         }
-        var tableEncoding = /* @__PURE__ */ genTtable(
+        var tableEncoding = genTtable(
             sbox,
             (s) => (mul(s, 3) << 24) | (s << 16) | (s << 8) | mul(s, 2),
         );
-        var xPowers = /* @__PURE__ */ (() => {
+        var xPowers = (() => {
             let p2 = new Uint8Array(16);
             for (let i = 0, x2 = 1; i < 16; i++, x2 = mul2(x2)) p2[i] = x2;
             return p2;
@@ -2498,7 +2503,7 @@ SOFTWARE.
             }
             return dst;
         }
-        var ctr = /* @__PURE__ */ wrapCipher(
+        var ctr = wrapCipher(
             { blockSize: 16, nonceLength: 16 },
             function (key, nonce) {
                 function processCtr(buf, dst) {
@@ -2521,296 +2526,20 @@ SOFTWARE.
             },
         );
 
-        // Hash helpers
-        /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
-        function isBytes2(a) {
-            return (
-                a instanceof Uint8Array ||
-                (ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array")
-            );
-        }
-        function anumber(n) {
-            if (!Number.isSafeInteger(n) || n < 0)
-                throw new Error("positive integer expected, got " + n);
-        }
-        function abytes2(b, ...lengths) {
-            if (!isBytes2(b)) throw new Error("Uint8Array expected");
-            if (lengths.length > 0 && !lengths.includes(b.length))
-                throw new Error(
-                    "Uint8Array expected of length " +
-                        lengths +
-                        ", got length=" +
-                        b.length,
-                );
-        }
-        function ahash(h2) {
-            if (typeof h2 != "function" || typeof h2.create != "function")
-                throw new Error("Hash should be wrapped by utils.createHasher");
-            (anumber(h2.outputLen), anumber(h2.blockLen));
-        }
-        function aexists(instance, checkFinished = !0) {
-            if (instance.destroyed)
-                throw new Error("Hash instance has been destroyed");
-            if (checkFinished && instance.finished)
-                throw new Error("Hash#digest() has already been called");
-        }
-        function aoutput(out, instance) {
-            abytes2(out);
-            let min = instance.outputLen;
-            if (out.length < min)
-                throw new Error(
-                    "digestInto() expects output buffer of length at least " +
-                        min,
-                );
-        }
-        function clean2(...arrays) {
-            for (let i = 0; i < arrays.length; i++) arrays[i].fill(0);
-        }
-        function createView2(arr) {
-            return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
-        }
-        function rotr(word, shift) {
-            return (word << (32 - shift)) | (word >>> shift);
-        }
-        function utf8ToBytes(str) {
-            if (typeof str != "string") throw new Error("string expected");
-            return new Uint8Array(new TextEncoder().encode(str));
-        }
-        function toBytes(data) {
-            return (
-                typeof data == "string" && (data = utf8ToBytes(data)),
-                abytes2(data),
-                data
-            );
-        }
-        function concatBytes2(...arrays) {
-            let sum = 0;
-            for (let i = 0; i < arrays.length; i++) {
-                let a = arrays[i];
-                (abytes2(a), (sum += a.length));
-            }
-            let res = new Uint8Array(sum);
-            for (let i = 0, pad = 0; i < arrays.length; i++) {
-                let a = arrays[i];
-                (res.set(a, pad), (pad += a.length));
-            }
-            return res;
-        }
-        var Hash = class {};
-        function createHasher(hashCons) {
-            let hashC = (msg) => hashCons().update(toBytes(msg)).digest(),
-                tmp = hashCons();
-            return (
-                (hashC.outputLen = tmp.outputLen),
-                (hashC.blockLen = tmp.blockLen),
-                (hashC.create = () => hashCons()),
-                hashC
-            );
-        }
-
-        // HMAC
-        var HMAC = class extends Hash {
-            constructor(hash, _key) {
-                (super(),
-                    (this.finished = !1),
-                    (this.destroyed = !1),
-                    ahash(hash));
-                let key = toBytes(_key);
-                if (
-                    ((this.iHash = hash.create()),
-                    typeof this.iHash.update != "function")
-                )
-                    throw new Error(
-                        "Expected instance of class which extends utils.Hash",
-                    );
-                ((this.blockLen = this.iHash.blockLen),
-                    (this.outputLen = this.iHash.outputLen));
-                let blockLen = this.blockLen,
-                    pad = new Uint8Array(blockLen);
-                pad.set(
-                    key.length > blockLen
-                        ? hash.create().update(key).digest()
-                        : key,
-                );
-                for (let i = 0; i < pad.length; i++) pad[i] ^= 54;
-                (this.iHash.update(pad), (this.oHash = hash.create()));
-                for (let i = 0; i < pad.length; i++) pad[i] ^= 106;
-                (this.oHash.update(pad), clean2(pad));
-            }
-            update(buf) {
-                return (aexists(this), this.iHash.update(buf), this);
-            }
-            digestInto(out) {
-                (aexists(this),
-                    abytes2(out, this.outputLen),
-                    (this.finished = !0),
-                    this.iHash.digestInto(out),
-                    this.oHash.update(out),
-                    this.oHash.digestInto(out),
-                    this.destroy());
-            }
-            digest() {
-                let out = new Uint8Array(this.oHash.outputLen);
-                return (this.digestInto(out), out);
-            }
-            _cloneInto(to) {
-                to || (to = Object.create(Object.getPrototypeOf(this), {}));
-                let {
-                    oHash,
-                    iHash,
-                    finished,
-                    destroyed,
-                    blockLen,
-                    outputLen,
-                } = this;
-                return (
-                    (to = to),
-                    (to.finished = finished),
-                    (to.destroyed = destroyed),
-                    (to.blockLen = blockLen),
-                    (to.outputLen = outputLen),
-                    (to.oHash = oHash._cloneInto(to.oHash)),
-                    (to.iHash = iHash._cloneInto(to.iHash)),
-                    to
-                );
-            }
-            clone() {
-                return this._cloneInto();
-            }
-            destroy() {
-                ((this.destroyed = !0),
-                    this.oHash.destroy(),
-                    this.iHash.destroy());
-            }
-        };
-
-        // SHA-256
-        class SHA256 extends Hash {
-            constructor() {
-                super();
-                this.blockLen = 64;
-                this.outputLen = 32;
-                this.finished = false;
-                this.destroyed = false;
-                this.buffer = new Uint8Array(64);
-                this.view = createView2(this.buffer);
-                this.bytesProcessed = 0;
-                this.h = new Uint32Array([
-                    1779033703, 3144134277, 1013904242, 2773480762,
-                    1359893119, 2600822924, 528734635, 1541459225
-                ]);
-            }
-            update(data) {
-                aexists(this);
-                data = toBytes(data);
-                let length = data.length;
-                let offset = 0;
-                while (offset < length) {
-                    let rem = this.bytesProcessed % 64;
-                    let amount = Math.min(64 - rem, length - offset);
-                    this.buffer.set(data.subarray(offset, offset + amount), rem);
-                    this.bytesProcessed += amount;
-                    offset += amount;
-                    if (this.bytesProcessed % 64 === 0) {
-                        this.processBlock();
-                    }
-                }
-                return this;
-            }
-            processBlock() {
-                let w = new Uint32Array(64);
-                for (let i = 0; i < 16; i++) w[i] = this.view.getUint32(i * 4, false);
-                for (let i = 16; i < 64; i++) {
-                    let s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
-                    let s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
-                    w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
-                }
-                let [a, b, c, d, e, f, g, h] = this.h;
-                let K = [
-                    1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221,
-                    3624381080, 310598401, 607225278, 1426881987, 1925073988, 2162078206, 2614888103, 3248222580,
-                    3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986,
-                    2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241893,
-                    666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037,
-                    2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344,
-                    430227734, 506209300, 563876556, 679035119, 855842279, 1110333553, 1254581701, 1507682399,
-                    1749673326, 1819256910, 2065188609, 2267652309, 2561422717, 2822185153, 3107256930, 3372255434
-                ];
-                for (let i = 0; i < 64; i++) {
-                    let S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
-                    let ch = (e & f) ^ (~e & g);
-                    let temp1 = (h + S1 + ch + K[i] + w[i]) | 0;
-                    let S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
-                    let maj = (a & b) ^ (a & c) ^ (b & c);
-                    let temp2 = (S0 + maj) | 0;
-                    h = g; g = f; f = e; e = (d + temp1) | 0;
-                    d = c; c = b; b = a; a = (temp1 + temp2) | 0;
-                }
-                this.h[0] = (this.h[0] + a) | 0; this.h[1] = (this.h[1] + b) | 0;
-                this.h[2] = (this.h[2] + c) | 0; this.h[3] = (this.h[3] + d) | 0;
-                this.h[4] = (this.h[4] + e) | 0; this.h[5] = (this.h[5] + f) | 0;
-                this.h[6] = (this.h[6] + g) | 0; this.h[7] = (this.h[7] + h) | 0;
-            }
-            digestInto(out) {
-                aexists(this);
-                aoutput(out, this);
-                this.finished = true;
-                let rem = this.bytesProcessed % 64;
-                this.buffer[rem] = 128;
-                this.buffer.fill(0, rem + 1);
-                if (rem >= 56) {
-                    this.processBlock();
-                    this.buffer.fill(0);
-                }
-                let bits = this.bytesProcessed * 8;
-                let view = createView2(this.buffer);
-                view.setUint32(60, bits % 0x100000000, false);
-                this.processBlock();
-                let outView = createView2(out);
-                for (let i = 0; i < 8; i++) outView.setUint32(i * 4, this.h[i], false);
-            }
-            digest() {
-                let out = new Uint8Array(32);
-                this.digestInto(out);
-                return out;
-            }
-            destroy() {
-                this.destroyed = true;
-                this.buffer.fill(0);
-                this.h.fill(0);
-            }
-        }
-        const sha256 = createHasher(() => new SHA256());
-
-        // CryptoContext wrapper
-        class CryptoContext {
-            constructor(clientKey) {
-                this.clientKey = clientKey;
-            }
-            decrypt(part) {
-                const iv = new Uint8Array(16);
-                iv.set(part.iv);
-                const hmacKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-hmac-key")).digest();
-                const expectedHmac = new HMAC(sha256, hmacKey).update(part.encryptedContent).digest();
-                if (!sameBytes(expectedHmac, part.hmac)) {
-                    throw new Error("UMP HMAC verification failed");
-                }
-                const cipherKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-encrypt-key")).digest();
-                return ctr(cipherKey, iv).decrypt(part.encryptedContent);
-            }
-            encrypt(plaintext) {
+        function CryptoContext(key) {
+            this.decrypt = function (part) {
+                return ctr(key, part.iv).decrypt(part.encryptedContent);
+            };
+            this.encrypt = function (plaintext) {
                 const iv = new Uint8Array(16);
                 if (typeof crypto !== "undefined" && crypto.getRandomValues) {
                     crypto.getRandomValues(iv);
                 } else {
                     for (let i = 0; i < 16; i++) iv[i] = Math.floor(Math.random() * 256);
                 }
-                const cipherKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-encrypt-key")).digest();
-                const encryptedContent = ctr(cipherKey, copyBytes(iv)).encrypt(plaintext);
-                const hmacKey = new HMAC(sha256, this.clientKey).update(textEncoder.encode("onesie-hmac-key")).digest();
-                const hmac = new HMAC(sha256, hmacKey).update(encryptedContent).digest();
-                return { encryptedContent, hmac, iv };
-            }
+                const encryptedContent = ctr(key, iv).encrypt(plaintext);
+                return { encryptedContent, iv };
+            };
         }
 
         return { CryptoContext, gzipSync, gunzipSync };
