@@ -1,6 +1,8 @@
-#!author=怎么肥事
+#!author=@怎么肥事@gholts
 #!name=Youtube
 #!desc=适用于 Youtube
+[Argument]
+auto_hd=switch,"true","false",tag=auto_hd, desc=auto_hd
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
@@ -10,5 +12,6 @@
 
 [Script]
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.response.js, requires-body=true, binary-body-mode=true, timeout=60, tag=youtube.response
+http-request ^https?:\/\/[\w-]+\.googlevideo\.com\/videoplayback script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.auto-hd, argument="{"autoHd":{auto_hd}}"
 [MITM]
 hostname = *.googlevideo.com, redirector*.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
