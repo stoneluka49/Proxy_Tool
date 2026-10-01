@@ -7,8 +7,7 @@
 
 block_games=switch,"false","true",tag=隐藏内置游戏, desc=用于隐藏YouTube游戏服务
 block_store=switch,"false","true",tag=隐藏商品橱窗, desc=用于隐藏YouTube商品推广
-
-
+block_shorts=switch,"false","true",tag=屏蔽 shorts, desc=用于屏蔽 YouTube shorts
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
