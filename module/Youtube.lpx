@@ -6,6 +6,7 @@ auto_hd=switch,"true","false",tag=自动最高画质, desc=自动选择YouTube�
 native_download=switch,"false","true",tag=开启本地下载, desc=解锁YouTube下载功能
 block_games=switch,"true","false",tag=隐藏内置游戏, desc=用于隐藏YouTube游戏服务
 block_store=switch,"true","false",tag=隐藏商品橱窗, desc=用于隐藏YouTube商品推广
+jump_ahead=switch,"true","false",tag=开启精彩跳转, desc=解锁 YouTube Jump Ahead 按钮
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
