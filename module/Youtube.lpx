@@ -5,6 +5,7 @@
 auto_hd=switch,"true","false",tag=自动最高画质, desc=自动选择YouTube最高画质
 native_download=switch,"false","true",tag=开启本地下载, desc=解锁YouTube下载功能
 block_games=switch,"true","false",tag=隐藏内置游戏, desc=用于隐藏YouTube游戏服务
+block_store=switch,"true","false",tag=隐藏商品橱窗, desc=用于隐藏YouTube商品推广
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
@@ -20,5 +21,7 @@ http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player(?:\?.*)?
 http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:navigation\/resolve_url|browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config)(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.response, argument="{"blockUpload":{block_upload},"blockShorts":{block_shorts},"blockGames":{block_games},"blockVerticalLive":{block_vertical_live},"jumpAhead":{jump_ahead},"autoHd":{auto_hd},"blockStore":{block_store}}"
 http-response ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.ump, argument="{"blockGames":{block_games},"blockVerticalLive":{block_vertical_live},"jumpAhead":{jump_ahead},"autoHd":{auto_hd},"blockStore":{block_store}}"
 http-request ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.init
+http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player\/ad_break(?:\?.*)?$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, tag=youtube.enhance.ad-break
+http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js, requires-body=true, binary-body-mode=true, tag=youtube.enhance.log-event
 [MITM]
 hostname = *.googlevideo.com, redirector*.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
