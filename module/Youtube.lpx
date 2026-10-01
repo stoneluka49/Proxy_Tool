@@ -2,7 +2,7 @@
 #!name=Youtube
 #!desc=适用于 Youtube
 [Argument]
-auto_hd=switch,"true","false",tag=auto_hd, desc=auto_hd
+auto_hd=switch,"true","false",tag=自动最高画质, desc=自动选择YouTube最高画质
 [Rewrite]
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+) https://$1$2$3 302
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad - reject-200
