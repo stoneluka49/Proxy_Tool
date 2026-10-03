@@ -9,6 +9,19 @@
  *       2) 改用仍然正常的 /x/v2/region/index (签名只与参数有关, 与路径无关, 可复用)
  *       成功后把响应改成 200 + 分区 JSON, 接口恢复正常时脚本不会改动任何内容。
  */
+
+// ===== 可自行修改 =====
+// 国际版 3.20.1 不识别 bilibili://pgc/bangumi、bilibili://pgc/domestic, 点击后没有任何反应。
+// MODE: "web"    = 把 番剧/国创 改成网页链接 (在 App 内置浏览器打开)
+//       "remove" = 直接从列表里删除打不开的入口
+//       "off"    = 不处理, 原样返回
+const MODE = "web";
+const WEB_URLS = {
+  13: "https://www.bilibili.com/anime/",      // 番剧
+  167: "https://www.bilibili.com/guochuang/", // 国创
+};
+// 没有 uri 的入口 (如 剧情 tid=85) 补成 bilibili://region/<tid>
+// =====================
 const TAG = "[BiliRegionFix] ";
 const log = (...a) => console.log(TAG + a.join(" "));
 
@@ -40,7 +53,29 @@ function run() {
       if (Array.isArray(it.children)) it.children = it.children.map(fix);
       return it;
     };
-    if (Array.isArray(json.data)) json.data = json.data.map(fix);
+    if (Array.isArray(json.data)) {
+      json.data = json.data.map(fix);
+      if (MODE !== "off") {
+        const out = [];
+        json.data.forEach((it) => {
+          const uri = it.uri || "";
+          const dead = uri.indexOf("bilibili://pgc/") === 0;
+          if (dead) {
+            if (MODE === "remove") return;
+            if (WEB_URLS[it.tid]) {
+              it.uri = WEB_URLS[it.tid];
+              it.type = 0;
+              it.is_bangumi = 0;
+            }
+          } else if (!uri && it.tid !== undefined) {
+            if (MODE === "remove") return;
+            it.uri = "bilibili://region/" + it.tid;
+          }
+          out.push(it);
+        });
+        json.data = out;
+      }
+    }
     return json;
   };
 
