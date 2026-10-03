@@ -1,12 +1,24 @@
 #!name = 哔哩哔哩 𝕏
 #!desc = 扫码登录原生签名修复、1080P高码率画质解锁
 #!openUrl = https://apps.apple.com/app/id736536022
-#!author = TomCatXue
+#!author = TomCatXue + ddgksf2013 + bm7
 
 [Rewrite]
+#～BiliBili_哔哩哔哩_小卡片广告
+^https://api.bilibili.com/pgc/season/player/cards - reject-dict
+
+#～BiliBili_哔哩哔哩_可能的一些推广(beta)
+^https?:\/\/api\.bilibili\.com\/pgc\/season\/app\/related\/recommend\? - reject-dict
+
+# 移除搜索框默认词
+response if ${url} ~= /^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.v1\.Search\/DefaultWords$/i then response.body.mock("text", "AAAAACEaHeaQnOe0ouinhumikeOAgeeVquWJp+aIlnVw5Li7KAE=", 200, true)
 
 # 非会员开启会员专属清晰度 (本地UI显示)
 response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo\?/i then response.json.jq(".data.vip |= if . != null and .status == 0 then . + { status: 1, type: 2, due_date: 9005270400000, role: 15 } else . end")
+
+# 为上述 gRPC Mock 接口与原生分区接口补充 grpc-status=0 (防止新版客户端因缺少状态头触发错误断流)
+response if ${url} ~= /^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(interface\.v1\.(Teenagers\/ModeStatus|Search\/DefaultWords)|view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(PlayPause|ViewEndPage))$/i then response.header.add("grpc-status", "0")
+response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.show\.v1\.(Mixture\/(RegionIndex|RegionList)|Rank\/RankRegionList)$/i then response.header.add("grpc-status", "0")
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
@@ -16,4 +28,4 @@ request if ${url} ~= /^https?:\/\/(?:app|api)\.bilibili\.com\/x\/(?:v2\/account\
 request if ${url} ~= /^https:\/\/passport\.bilibili\.com\/x\/passport-login\/web\/qrcode\/(check|confirm|scene)/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_qrcode.js") with tag="[哔哩哔哩]扫码登录修复", timeout=10, requires_body=true
 
 [MITM]
-hostname = app.bilibili.com, api.bilibili.com, passport.bilibili.com
+hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com
