@@ -33,5 +33,7 @@ request if ${url} ~= /^https?:\/\/(?:app|api)\.bilibili\.com\/x\/(?:v2\/account\
 request if ${url} ~= /^https:\/\/passport\.bilibili\.com\/x\/passport-login\/web\/qrcode\/(check|confirm|scene)/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_qrcode.js") with tag="[哔哩哔哩]扫码登录修复", timeout=10, requires_body=true
 
 http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.polymer\.app\.search\.v1\.Search\/SearchAll$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili.protobuf.js, requires-body=true, binary-body-mode=true, tag=移除搜索结果广告
+http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.app\.show\.v1\.Popular\/Index$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili.protobuf.js, requires-body=true, binary-body-mode=true, tag=移除热门话题
+
 [MITM]
 hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com
