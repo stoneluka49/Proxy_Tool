@@ -1,5 +1,5 @@
-#!name=Youtube
-#!desc=适用于 Youtube blockGames/blockStore
+#!name=YouTube去广告隐藏Shorts/Upload版 
+#!desc=基于稳定版，额外去除首页Shorts/去除首页shorts区块/去除视频播内嵌购推荐卡/blockGames/blockStore
 #!author=@怎么肥事@gholts
 
 [Rewrite]
