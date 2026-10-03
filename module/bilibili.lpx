@@ -41,5 +41,7 @@ request if ${url} ~= /^https:\/\/passport\.bilibili\.com\/x\/passport-login\/web
 # 移除搜索结果广告
 http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.polymer\.app\.search\.v1\.Search\/SearchAll$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili.protobuf.js, requires-body=true, binary-body-mode=true, tag=移除搜索结果广告
 
+#Bilibili国际版-分区修复
+http-response ^https:\/\/app\.bilibili\.com\/x\/v2\/channel\/region\/list\? script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_region_fix.js, requires-body=true, timeout=20, tag=BiliRegionFix
 [MITM]
 hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com
