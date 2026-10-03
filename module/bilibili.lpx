@@ -19,7 +19,7 @@ response if ${url} ~= /^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.
 ^https?:\/\/app\.bilibili\.com\/bilibili\.app\.interface\.v1\.Search\/Default - reject
 
 # 拦截 B 站 WBI 热搜/搜索广场 API
-response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/search\/square(?:\?|$)/ && ${response.status} == 200 then response.json.set("data", [response.json.data[1]])
+^https:\/\/app\.bilibili\.com\/x\/v2\/search\/square(?:\?.*)?$ response-body-json-jq 'del(.data[2], .data[0])'
 
 #～BiliBili_哔哩哔哩_去除动态中的话题
 ^https?:\/\/api\.vc\.bilibili\.com\/topic_svr\/v1\/topic_svr - reject-dict
