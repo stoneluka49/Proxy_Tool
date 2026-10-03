@@ -1,4 +1,5 @@
 /*
+ * v2: Loon 的 $httpClient timeout 单位是毫秒, 之前写 10 实际只有 10ms 导致必然超时。
  * Bilibili 国际版 3.20.1 「分区」页 网络错误 修复 (Loon http-response 脚本)
  *
  * 原因: App 请求 https://app.bilibili.com/x/v2/channel/region/list 时,
@@ -26,7 +27,7 @@ function run() {
   const headers = {};
   Object.keys($request.headers || {}).forEach((k) => {
     const lk = k.toLowerCase();
-    if (["host", "content-length", ":authority", ":path", ":method", ":scheme"].includes(lk)) return;
+    if (["host", "content-length", "accept-encoding", "connection", ":authority", ":path", ":method", ":scheme"].includes(lk)) return;
     headers[k] = $request.headers[k];
   });
 
@@ -56,7 +57,7 @@ function run() {
     }
     const c = candidates[i++];
     log("尝试:", c.name);
-    $httpClient.get({ url: c.url, headers: headers, timeout: 10 }, (err, resp, data) => {
+    $httpClient.get({ url: c.url, headers: headers, timeout: 6000 }, (err, resp, data) => {
       if (err || !resp || Number(resp.status || resp.statusCode) !== 200) {
         log("失败:", c.name, err || (resp && (resp.status || resp.statusCode)));
         return next();
@@ -84,4 +85,3 @@ function run() {
   };
   next();
 }
-
