@@ -13,12 +13,12 @@
 // ===== 可自行修改 =====
 // 国际版 3.20.1 不识别 bilibili://pgc/bangumi、bilibili://pgc/domestic, 点击后没有任何反应
 // (抓包显示它的首页标签里也没有番剧入口)。
-// MODE: "region" = 番剧/国创 改成 App 原生的分区页 bilibili://region/<tid> (默认, 与 剧情 的打开方式相同)
-//       "web"    = 改成网页链接 (在内置浏览器打开)
+// MODE: "web"    = 番剧/国创 改成网页链接, 在内置浏览器打开 (默认, 目前唯一实测可打开的方式)
 //       "remove" = 直接删除打不开的入口
-//       "off"    = 不处理, 原样返回
-const MODE = "region";
-// 想自己试其它跳转地址时, 在这里填(优先级最高), 例如 13: "bilibili://pgc/home"
+//       "region" = 改成 bilibili://region/<tid>  ※实测 13/167 会导致 App 闪退, 不要使用
+//       "off"    = 不处理, 原样返回 (点击无反应)
+const MODE = "remove";
+// 想自己试其它跳转地址时, 在这里填(优先级最高)。注意: 国际版不认识的地址点了没反应, 个别地址可能闪退
 const URI_OVERRIDE = {
   // 13: "",   // 番剧
   // 167: "",  // 国创
