@@ -31,6 +31,12 @@ response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo\?/i
 response if ${url} ~= /^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(interface\.v1\.(Teenagers\/ModeStatus|Search\/DefaultWords)|view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(PlayPause|ViewEndPage))$/i then response.header.add("grpc-status", "0")
 response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.show\.v1\.(Mixture\/(RegionIndex|RegionList)|Rank\/RankRegionList)$/i then response.header.add("grpc-status", "0")
 
+# 腾讯云海外 COS (upos-sz-mirrorcosov / mirror*ov) -> 国内腾讯云 COS
+^http:\/\/upos-sz-mirror[a-z0-9-]*ov\.bilivideo\.com\/upgcxcode\/(.*)$ http://upos-sz-mirrorcos.bilivideo.com/upgcxcode/$1 302
+# Akamai 海外 -> 国内腾讯云 COS
+^http:\/\/upos-hz-mirrorakam\.akamaized\.net\/upgcxcode\/(.*)$ http://upos-sz-mirrorcos.bilivideo.com/upgcxcode/$1 302
+
+
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
 request if ${url} ~= /^https?:\/\/(?:app|api)\.bilibili\.com\/x\/(?:v2\/account\/mine|v2\/account\/myinfo|member\/app\/nickfree|resource\/show\/tab)/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_qrcode.js") with tag="[哔哩哔哩]凭证捕获"
