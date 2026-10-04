@@ -1,5 +1,5 @@
 #!name = 哔哩哔哩 𝕏
-#!desc = 过滤哔哩哔哩广告、扫码登录原生签名修复、1080P高码率画质解锁
+#!desc = 过滤哔哩哔哩广告、扫码登录原生签名修复、1080P高码率画质解锁、Bilibili国际版-分区修复(针对国际版BILIBILI 3.20.1 版本）
 #!openUrl = https://apps.apple.com/app/id736536022
 #!author = TomCatXue + ddgksf2013 + bm7 + kokoryh
 
@@ -41,7 +41,7 @@ request if ${url} ~= /^https:\/\/passport\.bilibili\.com\/x\/passport-login\/web
 # 移除搜索结果广告
 http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.polymer\.app\.search\.v1\.Search\/SearchAll$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili.protobuf.js, requires-body=true, binary-body-mode=true, tag=移除搜索结果广告
 
-#Bilibili国际版-分区修复
+#Bilibili国际版-分区修复(针对国际版BILIBILI 3.20.1 版本）
 http-response ^https:\/\/app\.bilibili\.com\/x\/v2\/channel\/region\/list\? script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_region_fix.js, requires-body=true, timeout=25, tag=BiliRegionFix
 [MITM]
 hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com
