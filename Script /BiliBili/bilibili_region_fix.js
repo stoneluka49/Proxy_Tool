@@ -11,14 +11,21 @@
  */
 
 // ===== 可自行修改 =====
-// 国际版 3.20.1 不识别 bilibili://pgc/bangumi、bilibili://pgc/domestic, 点击后没有任何反应。
-// MODE: "web"    = 把 番剧/国创 改成网页链接 (在 App 内置浏览器打开)
-//       "remove" = 直接从列表里删除打不开的入口
+// 国际版 3.20.1 不识别 bilibili://pgc/bangumi、bilibili://pgc/domestic, 点击后没有任何反应
+// (抓包显示它的首页标签里也没有番剧入口)。
+// MODE: "region" = 番剧/国创 改成 App 原生的分区页 bilibili://region/<tid> (默认, 与 剧情 的打开方式相同)
+//       "web"    = 改成网页链接 (在内置浏览器打开)
+//       "remove" = 直接删除打不开的入口
 //       "off"    = 不处理, 原样返回
-const MODE = "web";
+const MODE = "region";
+// 想自己试其它跳转地址时, 在这里填(优先级最高), 例如 13: "bilibili://pgc/home"
+const URI_OVERRIDE = {
+  // 13: "",   // 番剧
+  // 167: "",  // 国创
+};
 const WEB_URLS = {
-  13: "https://www.bilibili.com/anime/",      // 番剧
-  167: "https://www.bilibili.com/guochuang/", // 国创
+  13: "https://www.bilibili.com/anime/",
+  167: "https://www.bilibili.com/guochuang/",
 };
 // 没有 uri 的入口 (如 剧情 tid=85) 补成 bilibili://region/<tid>
 // =====================
@@ -62,11 +69,15 @@ function run() {
           const dead = uri.indexOf("bilibili://pgc/") === 0;
           if (dead) {
             if (MODE === "remove") return;
-            if (WEB_URLS[it.tid]) {
+            if (URI_OVERRIDE[it.tid]) {
+              it.uri = URI_OVERRIDE[it.tid];
+            } else if (MODE === "web" && WEB_URLS[it.tid]) {
               it.uri = WEB_URLS[it.tid];
-              it.type = 0;
-              it.is_bangumi = 0;
+            } else {
+              it.uri = "bilibili://region/" + it.tid;
             }
+            it.type = 0;
+            it.is_bangumi = 0;
           } else if (!uri && it.tid !== undefined) {
             if (MODE === "remove") return;
             it.uri = "bilibili://region/" + it.tid;
