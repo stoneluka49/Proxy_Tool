@@ -48,10 +48,13 @@ request if ${url} ~= /^https:\/\/passport\.bilibili\.com\/x\/passport-login\/web
 http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.polymer\.app\.search\.v1\.Search\/SearchAll$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili.protobuf.js, requires-body=true, binary-body-mode=true, tag=移除搜索结果广告
 
 #Bilibili国际版-分区修复(针对国际版BILIBILI 3.20.1 版本）
-http-response ^https:\/\/app\.bilibili\.com\/x\/v2\/channel\/region\/list\? script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_region_fix.js, requires-body=true, timeout=25, tag=BiliRegionFix
+http-response ^https:\/\/app\.bilibili\.com\/x\/v2\/channel\/region\/list\? script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_region_fix.js, requires-body=true, timeout=30, tag=BiliRegionFix
 
 #Bilibili国际版-去除流量卡/会员推广
 http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(com|net))\/bilibili\.app\.view\.v1\.View\/TFInfo$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_tfinfo_block.js, requires-body=true, binary-body-mode=true, timeout=30, tag=BiliTFInfo
+
+#Bilibili国际版-去除云视听小电视徽章
+http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(com|net))\/bilibili\.community\.service\.dm\.v1\.DM\/DmView$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_dmview_tvbadge.js, requires-body=true, binary-body-mode=true, timeout=30, tag=BiliDmViewTV
 
 [MITM]
 hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com, app.biliapi.net, app.biliapi.com
