@@ -1,15 +1,37 @@
 
-#!name=MissAV 去播放弹窗
-#!desc=屏蔽点击播放时 window.open 弹出的广告页
+#!name = 综合去广告与VIP解锁脚本集
+#!desc = 移除 MissAV 网页弹窗广告、滴滴/美团/爱思助手应用内广告，并解锁 AdGuard 高级功能与 Pixiv 论坛优化。
+#!author=chxm1023 + ddgksf2013 + ZenmoFeiShi + stoneluka49
 
+[Rule]
+
+# > 滴滴
+IP-CIDR,123.207.209.39/32,REJECT-DROP,no-resolve
+IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
+#美团
+URL-REGEX,"^https?:\/\/(s3plus|flowplus)\.meituan\.net\/v\d\/\w+\/linglong\/\w+\.(gif|jpg|mp4)",REJECT
 
 [Rewrite]
-# 兜底:就算弹窗逻辑没被改掉,广告跳转页也直接拦截
-^https:\/\/missav\.ws\/pop\? - reject-200
 
+# MISSAV 兜底:就算弹窗逻辑没被改掉,广告跳转页也直接拦截
+^https:\/\/missav\.ws\/pop\? - reject-200
+# > 爱思助手
+^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml - reject
+# > 滴滴青桔
+^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif) - reject-200
+^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api - reject-200
+# 横幅广告
+^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name= - reject-dict
+^https?:\/\/daijia\.kuaidadi\.com\/gateway\?api=prado\.cms\.delivery\.batch&apiVe - reject-dict
 [Script]
 # 在视频页 <head> 后注入:让 window.open 失效,并伪装成"窗口已关闭"
 http-response ^https:\/\/missav\.ws\/(?!(?:pop|build|cdn-cgi|api|img|fonts|js)(?:\/|\?|$))[^?]*$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/MISSAV/response.js, requires-body=true, tag=MissAV去弹窗
 
+# > PIXIV论坛@ddgksf2013
+http-response ^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token) script-path=https://github.com/ddgksf2013/Scripts/raw/master/pixivAds.js, requires-body=true, tag=pixivAds
+
+# > ADguard 高级权限 --author=@chxm1023
+http-response ^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?) script-path=https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js, requires-body=true, tag=AdGuard
+
 [MITM]
-hostname = missav.ws
+hostname = missav.ws,pt-starimg.didistatic.com,omgup*.xiaojukeji.com,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,flowplus.meituan.net
