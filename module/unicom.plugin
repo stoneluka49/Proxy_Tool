@@ -1,1 +1,11 @@
+#!name=中国联通去广告
+#!desc=去除首页弹窗、开屏、Banner、信息流、服务提醒等广告（基于 iphone_c@12.01 抓包）
+#!author=custom
+#!icon=https://img.client.10010.com/favicon.ico
+
+[Script]
+http-response ^https:\/\/m\.client\.10010\.com\/(mobileService\/activity\/homePopUpActivityNew\.htm|mobileService\/customer\/accountListData\.htm|clientIndex\/homefusion\/fuInter|clientIndex\/api\/v1\/index\/(queryIndexWaterfall|queryOMO|queryIndexExclusiveOffers)|mobileserviceNine\/api\/v1\/homeService\/getServiceHomeMarketingBits|clientIndex\/v1\/api\/(serviceReminder|query517Active)|getDataFromService\?.*methodType=searchScroll) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Unicom/unicom_ad.js, requires-body=true, tag=联通去广告
+
+[MITM]
+hostname = m.client.10010.com
 
