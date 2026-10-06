@@ -21,9 +21,21 @@ if (/mobileService\/activity\/homePopUpActivityNew\.htm/.test(url)) {
     }
   }
 
-// 3. 首页顶部主题背景/Banner（华为新品主题日）
-} else if (/clientIndex\/homefusion\/fuInter/.test(url)) {
+// 3. 首页融合配置 fuInter（12.01 路径为 clientIndex，12.0001 为 mobileserviceNine）
+//    - 顶部主题背景（华为新品主题日）
+//    - homeAdv_A5 / fuchuangAdv_A8 首页横幅广告
+//    - bottomLabel.bottomMallKey 底部中间的 "Apple 新品" 商城图标（置空后恢复默认商城标签）
+} else if (/(clientIndex|mobileserviceNine)\/homefusion\/fuInter/.test(url)) {
   if (obj["HomeFusion.backGroundQuery"]) obj["HomeFusion.backGroundQuery"].result = [];
+  if (obj["HomeFusion.homeAdv_A5"]) obj["HomeFusion.homeAdv_A5"] = {};
+  if (obj["HomeFusion.fuchuangAdv_A8"]) obj["HomeFusion.fuchuangAdv_A8"] = {};
+  if (obj["HomeFusion.bottomLabel"]) obj["HomeFusion.bottomLabel"].bottomMallKey = null;
+
+// 3b. 商城/推荐页模块（card.10010.com 与 m.10010.com 的 mall-access 接口）
+} else if (/mall-access\/homePage\/v25\/(topTab\/activityShow|query\/smartHome|query\/unicomCulture|topTerminalShow|topBanner)/.test(url)) {
+  obj.data = Array.isArray(obj.data) ? [] : null;
+} else if (/mall-access\/query\/waterfallFlow/.test(url)) {
+  if (obj.data && obj.data.res) { obj.data.res.pageList = []; obj.data.res.totalPages = 0; }
 
 // 4. 首页信息流（机型推荐、套餐升档、宽带、权益超市等）
 } else if (/clientIndex\/api\/v1\/index\/queryIndexWaterfall/.test(url)) {
