@@ -1,6 +1,6 @@
 #!name=中国联通去广告
 #!desc=去除首页弹窗、开屏、Banner、信息流、服务提醒等广告（基于 iphone_c@12.01 抓包）
-#!author=custom
+#!author=stoneluka49
 #!icon=https://img.client.10010.com/favicon.ico
 
 [Script]
