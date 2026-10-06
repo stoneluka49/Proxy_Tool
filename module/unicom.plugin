@@ -4,8 +4,7 @@
 #!icon=https://img.client.10010.com/favicon.ico
 
 [Script]
-http-response ^https:\/\/m\.client\.10010\.com\/(mobileService\/activity\/homePopUpActivityNew\.htm|mobileService\/customer\/accountListData\.htm|clientIndex\/homefusion\/fuInter|clientIndex\/api\/v1\/index\/(queryIndexWaterfall|queryOMO|queryIndexExclusiveOffers)|mobileserviceNine\/api\/v1\/homeService\/getServiceHomeMarketingBits|clientIndex\/v1\/api\/(serviceReminder|query517Active)|getDataFromService\?.*methodType=searchScroll) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Unicom/unicom_ad.js, requires-body=true, tag=联通去广告
+http-response ^https:\/\/(m\.client\.10010\.com\/(mobileService\/activity\/homePopUpActivityNew\.htm|mobileService\/customer\/accountListData\.htm|(clientIndex|mobileserviceNine)\/homefusion\/fuInter|clientIndex\/api\/v1\/index\/(queryIndexWaterfall|queryOMO|queryIndexExclusiveOffers)|mobileserviceNine\/api\/v1\/homeService\/getServiceHomeMarketingBits|clientIndex\/v1\/api\/(serviceReminder|query517Active)|getDataFromService\?.*methodType=searchScroll)|(card|m)\.10010\.com\/mall-access\/(homePage\/v25\/(topTab\/activityShow|query\/smartHome|query\/unicomCulture|topTerminalShow|topBanner)|query\/waterfallFlow)) script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Unicom/unicom_ad.js, requires-body=true, tag=联通去广告
 
 [MITM]
-hostname = m.client.10010.com
-
+hostname = m.client.10010.com, card.10010.com, m.10010.com
