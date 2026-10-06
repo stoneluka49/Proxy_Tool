@@ -1,4 +1,3 @@
-
 /*
  * 中国联通 App (iphone_c@12.01) 去广告脚本
  * 依据抓包文件分析生成，处理 m.client.10010.com 下的广告/营销接口
@@ -42,9 +41,10 @@ if (/mobileService\/activity\/homePopUpActivityNew\.htm/.test(url)) {
 } else if (/homeService\/getServiceHomeMarketingBits/.test(url)) {
   if (obj.data) { obj.data.topList = []; obj.data.bottomList = []; obj.data.hiddenTop = true; obj.data.hiddenBottom = true; }
 
-// 8. "服务提醒：您有12个月vip会员可领取" 横条
+// 8. "服务提醒" 整个模块：返回失败码 + data=null，客户端会整块不渲染
+//    （data 为 {} 时 App 仍会画出空的提醒框，所以不能用空对象）
 } else if (/clientIndex\/v1\/api\/serviceReminder/.test(url)) {
-  obj = { code: "0000", data: {}, desc: "success" };
+  obj = { code: "9999", data: null, desc: "fail" };
 
 // 9. 搜索框轮播推广词（如"副卡0元领"）
 } else if (/getDataFromService\?.*methodType=searchScroll/.test(url)) {
