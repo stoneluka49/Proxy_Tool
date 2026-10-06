@@ -56,7 +56,12 @@ DOMAIN-SUFFIX, huggingface.co, PROXY
 # Wikipedia
 DOMAIN-SUFFIX, wikipedia.org, PROXY
 
-# ==================== 5. LOON插件域名 ====================
+# ==================== 5. LOON相关域名 ====================
 
 DOMAIN-SUFFIX, kelee.one, PROXY
-DOMAIN,kelvinlab.wuyra.com, PROXY
+DOMAIN-SUFFIX, nsloon.app, PROXY
+
+# ==================== 5. AV相关域名 ====================
+
+DOMAIN-SUFFIX, missav.ws, PROXY
+DOMAIN-SUFFIX, jable.tv, PROXY
