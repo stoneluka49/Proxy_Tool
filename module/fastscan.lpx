@@ -1,118 +1,120 @@
 #!name=快捷搜索
 #!desc=指令快捷搜索,适用于LOON
-#!author=修改自bai1zi
+#!author=bai1zi
 
 
 [Rewrite]
+# 兜底：必须放在最前面！Loon 会依次执行所有命中的规则，后执行的 302 覆盖先执行的，
+# 所以兜底放最前，后面具体规则命中时才能覆盖它
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^&]+).+/i as urlMatch then redirect(302, "https://www.google.com/search?q=${urlMatch.1}")
+
 # gm - Google 图片
-^https:\/\/duckduckgo\.com\/\?q=gm\+([^&]+).+ https://www.google.com/search?&tbm=isch&q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=gm(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.google.com/search?&tbm=isch&q=${urlMatch.1}")
 # gh - GitHub
-^https:\/\/duckduckgo\.com\/\?q=gh\+([^&]+).+ https://github.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=gh(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://github.com/search?q=${urlMatch.1}")
 # sof - Stack Overflow
-^https:\/\/duckduckgo\.com\/\?q=sof\+([^&]+).+ https://stackoverflow.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=sof(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://stackoverflow.com/search?q=${urlMatch.1}")
 # se - Stack Exchange
-^https:\/\/duckduckgo\.com\/\?q=se\+([^&]+).+ https://stackexchange.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=se(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://stackexchange.com/search?q=${urlMatch.1}")
 # wa - WolframAlpha
-^https:\/\/duckduckgo\.com\/\?q=wa\+([^&]+).+ https://www.wolframalpha.com/input/?i=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wa(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.wolframalpha.com/input/?i=${urlMatch.1}")
 # wiki - Wikipedia
-^https:\/\/duckduckgo\.com\/\?q=wiki(?:\+|%20)([^&]+).+ https://wikipedia.org/wiki/$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wiki(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://wikipedia.org/wiki/${urlMatch.1}")
 # wk - 中文 Wikipedia
-^https:\/\/duckduckgo\.com\/\?q=wk(?:\+|%20)([^&]+).+ https://zh.wikipedia.org/wiki/$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wk(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://zh.wikipedia.org/wiki/${urlMatch.1}")
 # mg - Magi
-^https:\/\/duckduckgo\.com\/\?q=mg(?:\+|%20)([^&]+).+ https://magi.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=mg(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://magi.com/search?q=${urlMatch.1}")
 # tf - Google 搜索 TestFlight
-^https:\/\/duckduckgo\.com\/\?q=tf(?:\+|%20)([^&]+).+ https://www.google.com/search?as_q=$1&as_sitesearch=testflight.apple.com 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tf(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.google.com/search?as_q=${urlMatch.1}&as_sitesearch=testflight.apple.com")
 # yd - 有道
-^https:\/\/duckduckgo\.com\/\?q=yd\+([^&]+).+ https://dict.youdao.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=yd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://dict.youdao.com/search?q=${urlMatch.1}")
 # trc - Google 翻译 → 中文
-^https:\/\/duckduckgo\.com\/\?q=trc\+([^&]+).+ https://translate.google.com/#view=home&op=translate&sl=auto&tl=zh-CN&text=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=trc(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://translate.google.com/#view=home&op=translate&sl=auto&tl=zh-CN&text=${urlMatch.1}")
 # tre - Google 翻译 → 英文
-^https:\/\/duckduckgo\.com\/\?q=tre\+([^&]+).+ https://translate.google.com/#view=home&op=translate&sl=auto&tl=en&text=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tre(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://translate.google.com/#view=home&op=translate&sl=auto&tl=en&text=${urlMatch.1}")
 # trj - Google 翻译 → 日文
-^https:\/\/duckduckgo\.com\/\?q=trj\+([^&]+).+ https://translate.google.com/#view=home&op=translate&sl=auto&tl=ja&text=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=trj(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://translate.google.com/#view=home&op=translate&sl=auto&tl=ja&text=${urlMatch.1}")
 # db - 豆瓣
-^https:\/\/duckduckgo\.com\/\?q=db\+([^&]+).+ https://m.douban.com/search/?query=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=db(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://m.douban.com/search/?query=${urlMatch.1}")
 # zh - 知乎
-^https:\/\/duckduckgo\.com\/\?q=zh\+([^&]+).+ https://www.zhihu.com/search?type=content&q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=zh(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.zhihu.com/search?type=content&q=${urlMatch.1}")
 # wb - 微博
-^https:\/\/duckduckgo\.com\/\?q=wb\+([^&]+).+ https://s.weibo.com/weibo/$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wb(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://s.weibo.com/weibo/${urlMatch.1}")
 # wx - 微信
-^https:\/\/duckduckgo\.com\/\?q=wx\+([^&]+).+ https://weixin.sogou.com/weixinwap?query=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wx(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://weixin.sogou.com/weixinwap?query=${urlMatch.1}")
 # rd - Reddit
-^https:\/\/duckduckgo\.com\/\?q=rd\+([^&]+).+ https://www.reddit.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=rd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.reddit.com/search?q=${urlMatch.1}")
 # tw - X / Twitter
-^https:\/\/duckduckgo\.com\/\?q=tw\+([^&]+).+ https://x.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tw(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://x.com/search?q=${urlMatch.1}")
 # ssp - 少数派
-^https:\/\/duckduckgo\.com\/\?q=ssp\+([^&]+).+ https://sspai.com/search/post/$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ssp(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://sspai.com/search/post/${urlMatch.1}")
 # csdn - CSDN
-^https:\/\/duckduckgo\.com\/\?q=csdn\+([^&]+).+ https://so.csdn.net/so/search/s.do?q=$1&t=&u= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=csdn(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://so.csdn.net/so/search/s.do?q=${urlMatch.1}&t=&u=")
 # zdm - 什么值得买
-^https:\/\/duckduckgo\.com\/\?q=zdm\+([^&]+).+ https://search.m.smzdm.com/?v=b&s=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=zdm(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://search.m.smzdm.com/?v=b&s=${urlMatch.1}")
 # amz - 亚马逊
-^https:\/\/duckduckgo\.com\/\?q=amz\+([^&]+).+ https://www.amazon.cn/gp/aw/s/?k=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=amz(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.amazon.cn/gp/aw/s/?k=${urlMatch.1}")
 # jd - 京东
-^https:\/\/duckduckgo\.com\/\?q=jd\+([^&]+).+ https://so.m.jd.com/ware/search.action?keyword=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=jd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://so.m.jd.com/ware/search.action?keyword=${urlMatch.1}")
 # tb - 淘宝
-^https:\/\/duckduckgo\.com\/\?q=tb\+([^&]+).+ https://s.m.taobao.com/h5?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tb(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://s.m.taobao.com/h5?q=${urlMatch.1}")
 # tm - 天猫
-^https:\/\/duckduckgo\.com\/\?q=tm\+([^&]+).+ https://s.m.tmall.com/m/search.htm?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tm(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://s.m.tmall.com/m/search.htm?q=${urlMatch.1}")
 # ac - AcFun
-^https:\/\/duckduckgo\.com\/\?q=ac\+([^&]+).+ https://www.acfun.cn/search?keyword=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ac(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.acfun.cn/search?keyword=${urlMatch.1}")
 # bli - 哔哩哔哩
-^https:\/\/duckduckgo\.com\/\?q=bli\+([^&]+).+ https://m.bilibili.com/search?keyword=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=bli(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://m.bilibili.com/search?keyword=${urlMatch.1}")
 # ytb - YouTube
-^https:\/\/duckduckgo\.com\/\?q=ytb\+([^&]+).+ https://www.youtube.com/results?search_query=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ytb(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.youtube.com/results?search_query=${urlMatch.1}")
 # ph - PornHub
-^https:\/\/duckduckgo\.com\/\?q=ph\+([^&]+).+ https://cn.pornhub.com/video/search?search=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ph(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://cn.pornhub.com/video/search?search=${urlMatch.1}")
 # af xxx - AcFun
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+af.+ https://www.acfun.cn/search?keyword=$1 302
-^https:\/\/duckduckgo\.com\/\?q=af\+([^&]+).+ https://www.acfun.cn/search?keyword=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)af.+/i as urlMatch then redirect(302, "https://www.acfun.cn/search?keyword=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=af(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.acfun.cn/search?keyword=${urlMatch.1}")
 # ys xxx - 茶杯狐
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+ys.+ https://cupfox.app/search?key=$1 302
-^https:\/\/duckduckgo\.com\/\?q=ys\+([^&]+).+ https://cupfox.app/search?key=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)ys.+/i as urlMatch then redirect(302, "https://cupfox.app/search?key=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ys(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://cupfox.app/search?key=${urlMatch.1}")
 # gd - Google Drive
-^https:\/\/duckduckgo\.com\/\?q=gd\+([^&]+).+ https://www.google.com/search?q=%22Google+Drive%22+$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=gd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.google.com/search?q=%22Google+Drive%22+${urlMatch.1}")
 # tgd - Telegram / gdurl
-^https:\/\/duckduckgo\.com\/\?q=tgd\+([^&]+).+ https://t.me/s/gdurl?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tgd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://t.me/s/gdurl?q=${urlMatch.1}")
 # zgd - zhao.pp.ua
-^https:\/\/duckduckgo\.com\/\?q=zgd(?:\+|%20)([^&]+).+ https://zhao.pp.ua/?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=zgd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://zhao.pp.ua/?q=${urlMatch.1}")
 # bi - 必应
-^https:\/\/duckduckgo\.com\/\?q=bi\+([^&]+).+ https://cn.bing.com/search?q=$1 302
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+bi.+ https://cn.bing.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=bi(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://cn.bing.com/search?q=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)bi.+/i as urlMatch then redirect(302, "https://cn.bing.com/search?q=${urlMatch.1}")
 # bd - 百度
-^https:\/\/duckduckgo\.com\/\?q=bd\+([^&]+).+ https://www.baidu.com/s?wd=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=bd(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.baidu.com/s?wd=${urlMatch.1}")
 # ddg - DuckDuckGo
-^https:\/\/duckduckgo\.com\/\?q=ddg\+([^&]+).+ https://duckduckgo.com/?ia=about&q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ddg(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://duckduckgo.com/?ia=about&q=${urlMatch.1}")
 # wz - 无追搜索
-^https:\/\/duckduckgo\.com\/\?q=wz\+([^&]+).+ https://www.wuzhuiso.com/s?q=$1 302
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+wz.+ https://www.wuzhuiso.com/s?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=wz(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.wuzhuiso.com/s?q=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)wz.+/i as urlMatch then redirect(302, "https://www.wuzhuiso.com/s?q=${urlMatch.1}")
 # yh - Greasy Fork / 油猴
-^https:\/\/duckduckgo\.com\/\?q=yh\+([^&]+).+ https://greasyfork.org/zh-CN/scripts?q=$1 302
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+yh.+ https://greasyfork.org/zh-CN/scripts?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=yh(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://greasyfork.org/zh-CN/scripts?q=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)yh.+/i as urlMatch then redirect(302, "https://greasyfork.org/zh-CN/scripts?q=${urlMatch.1}")
 # gi - Google 图片
-^https:\/\/duckduckgo\.com\/\?q=gi\+([^&]+).+ https://www.google.com/search?&tbm=isch&q=$1 302
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+gi.+ https://www.google.com/search?&tbm=isch&q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=gi(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.google.com/search?&tbm=isch&q=${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)gi.+/i as urlMatch then redirect(302, "https://www.google.com/search?&tbm=isch&q=${urlMatch.1}")
 # ios - 苹果应用搜索
-^https:\/\/duckduckgo\.com\/\?q=ios\+([^&]+).+ https://www.qimai.cn/search/index/search/$1 302
-^https:\/\/duckduckgo\.com\/\?q=([^+]+)\+ios.+ https://www.qimai.cn/search/index/search/$1 302
-# ==================================================
-^https:\/\/duckduckgo\.com\/\?q=([^&]+).+ https://www.google.com/search?q=$1 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=ios(?:\+|%20)([^&]+).+/i as urlMatch then redirect(302, "https://www.qimai.cn/search/index/search/${urlMatch.1}")
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=([^+&]+)(?:\+|%20)ios.+/i as urlMatch then redirect(302, "https://www.qimai.cn/search/index/search/${urlMatch.1}")
 # cn - 中国
-^https:\/\/duckduckgo\.com\/\?q=cn&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143465&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=cn&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=cn&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143465&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=cn&urlDesc=")
 # hk - 香港
-^https:\/\/duckduckgo\.com\/\?q=hk&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143463&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=hk&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=hk&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143463&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=hk&urlDesc=")
 # tw - 台湾
-^https:\/\/duckduckgo\.com\/\?q=tw&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143470&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=tw&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tw&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143470&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=tw&urlDesc=")
 # us - 美国
-^https:\/\/duckduckgo\.com\/\?q=us&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143441&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=us&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=us&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143441&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=us&urlDesc=")
 # jp - 日本
-^https:\/\/duckduckgo\.com\/\?q=jp&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143462&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=jp&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=jp&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143462&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=jp&urlDesc=")
 # kr - 韩国
-^https:\/\/duckduckgo\.com\/\?q=kr&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143466&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=kr&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=kr&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143466&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=kr&urlDesc=")
 # tr - 土耳其
-^https:\/\/duckduckgo\.com\/\?q=tr&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143480&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=tr&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=tr&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143480&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=tr&urlDesc=")
 # sg - 新加坡
-^https:\/\/duckduckgo\.com\/\?q=sg&.+ https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143464&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=sg&urlDesc= 302
+request if ${url} ~= /^https:\/\/duckduckgo\.com\/\?q=sg&.+/i then redirect(302, "https://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143464&mt=8&url=/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1108187390&cc=sg&urlDesc=")
 
 [MITM]
 hostname = duckduckgo.com
