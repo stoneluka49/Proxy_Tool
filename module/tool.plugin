@@ -14,24 +14,24 @@ URL-REGEX,"^https?:\/\/(s3plus|flowplus)\.meituan\.net\/v\d\/\w+\/linglong\/\w+\
 [Rewrite]
 
 # MISSAV 兜底:就算弹窗逻辑没被改掉,广告跳转页也直接拦截
-^https:\/\/missav\.ws\/pop\? - reject-200
+request if ${url} ~= /^https:\/\/missav\.ws\/pop\?/i then reject(200)
 # > 爱思助手
-^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml - reject
+request if ${url} ~= /^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml/i then reject(404)
 # > 滴滴青桔
-^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif) - reject-200
-^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api - reject-200
+request if ${url} ~= /^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif)/i then reject(200)
+request if ${url} ~= /^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api/i then reject(200)
 # 横幅广告
-^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name= - reject-dict
-^https?:\/\/daijia\.kuaidadi\.com\/gateway\?api=prado\.cms\.delivery\.batch&apiVe - reject-dict
+request if ${url} ~= /^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name=/i then reject_dict(200)
+request if ${url} ~= /^https?:\/\/daijia\.kuaidadi\.com\/gateway\?api=prado\.cms\.delivery\.batch&apiVe/i then reject_dict(200)
 [Script]
 # 在视频页 <head> 后注入:让 window.open 失效,并伪装成"窗口已关闭"
-http-response ^https:\/\/missav\.ws\/(?!(?:pop|build|cdn-cgi|api|img|fonts|js)(?:\/|\?|$))[^?]*$ script-path=https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/MISSAV/response.js, requires-body=true, tag=MissAV去弹窗
+response if ${url} ~= /^https:\/\/missav\.ws\/(?!(?:pop|build|cdn-cgi|api|img|fonts|js)(?:\/|\?|$))[^?]*$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/MISSAV/response.js") with tag="MissAV去弹窗", requires_body=true
 
 # > PIXIV论坛@ddgksf2013
-http-response ^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token) script-path=https://github.com/ddgksf2013/Scripts/raw/master/pixivAds.js, requires-body=true, tag=pixivAds
+response if ${url} ~= /^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token)/i then script("https://github.com/ddgksf2013/Scripts/raw/master/pixivAds.js") with tag="pixivAds", requires_body=true
 
 # > ADguard 高级权限 --author=@chxm1023
-http-response ^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?) script-path=https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js, requires-body=true, tag=AdGuard
+response if ${url} ~= /^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?)/i then script("https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js") with tag="AdGuard", requires_body=true
 
 [MITM]
 hostname = missav.ws,pt-starimg.didistatic.com,omgup*.xiaojukeji.com,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,flowplus.meituan.net
