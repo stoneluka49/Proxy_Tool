@@ -7,7 +7,7 @@
 [Rewrite]
 
 #～BiliBili_哔哩哔哩_屏蔽IP请求
-^https?:\/\/app\.bilibili\.com\/x\/resource\/ip - reject
+request if ${url} ~= /^https?:\/\/app\.bilibili\.com\/x\/resource\/ip/i then reject(404)
 
 #～BiliBili_哔哩哔哩_小卡片广告
 request if ${url} ~= /^https:\/\/api.bilibili.com\/pgc\/season\/player\/cards/i then reject_dict(200)
