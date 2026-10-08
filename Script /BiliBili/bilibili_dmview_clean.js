@@ -21,7 +21,7 @@ const REMOVE_COMMAND_DMS = true;       // B: 去除互动弹幕弹窗
 // B: 要去掉的互动弹幕类型; "*" = 全部。例如只去投票: ["#VOTE#"]
 // 已见到的类型: #VOTE#(投票) #ATTENTION#(关注)
 const BLOCK_COMMANDS = ["*"];
-const DISABLE_DANMAKU_DEFAULT = true; // C: 默认关闭弹幕 (实验性, 见说明)
+const DISABLE_DANMAKU_DEFAULT = false; // C: 默认关闭弹幕 (实验性, 见说明)
 // =====================
 
 // ---------- 最小 inflate (移植自 zlib puff.c, 仅解 raw deflate) ----------
