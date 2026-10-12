@@ -2,6 +2,23 @@
 #!desc=基于稳定版，额外去除首页Shorts/去除首页shorts区块/去除首页upload区块/去除视频播内嵌购推荐卡/blockGames/blockStore
 #!author=DivineEngine + app2smile + Maasea + ddgksf2013 + Aioneas + Oneasai + ZenmoFeiShi + gholts
 
+
+[Argument]
+blockShorts = switch,true,tag=屏蔽 Shorts,desc=首页/搜索/推荐里不再出现 Shorts，并移除底栏的 Shorts 按钮
+keepSubsShorts = switch,false,tag=订阅页保留 Shorts,desc=开启「屏蔽 Shorts」时，订阅标签页里的 Shorts 仍然保留
+blockUpload = switch,true,tag=隐藏「创建」按钮,desc=移除底栏中间的 + 创建按钮
+hideSubscriptionsTab = switch,false,tag=隐藏「订阅」标签,desc=从底栏移除订阅标签页
+hideLibraryTab = switch,false,tag=隐藏「我」标签,desc=从底栏移除「我」标签页。隐藏后无法从底栏进入账号页面，慎用
+blockShelves = switch,false,tag=首页隐藏横向货架(实验),desc=移除首页的横向货架（继续观看、新闻、帖子合集等）。翻页加载的内容可能不生效
+blockGames = switch,true,tag=屏蔽小游戏,desc=移除信息流与视频页里的 Playables 小游戏卡片
+blockStore = switch,true,tag=屏蔽商店与商品,desc=移除商店标签、商品货架、视频下方的商品卡片和商品浮层
+blockVerticalLive = switch,false,tag=屏蔽竖屏直播,desc=移除首页信息流里的竖屏沉浸式直播，横屏直播不受影响
+blockEndScreen = switch,true,tag=屏蔽片尾画面,desc=移除视频末尾的创作者卡片、频道头像、链接和「隐藏」按钮。视频画面自带的内容无法去掉
+blockImmersive = switch,false,tag=隐藏沉浸式标签(仅Music),desc=仅对 YouTube Music 有效：从底栏移除「沉浸式」标签
+lyricLang = select,"off","zh-Hans","zh-Hant","en","ja","ko","vi","fr","de","ru",tag=歌词翻译,desc=YouTube Music 歌词翻译成所选语言，off 为关闭
+captionLang = select,"off","zh-Hans","zh-Hant","en","ja","ko","vi","fr","de","ru",tag=字幕翻译,desc=给视频追加所选语言的翻译字幕，off 为关闭
+debug = switch,false,tag=调试日志,desc=在 Loon 日志里输出详细信息（含 [EndScreen] 命中情况），排查问题时再开启
+
 [Rewrite]
 request if ${url} ~= /^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?&ctier=L(&.+?),ctier,(.+)/i as urlMatch then redirect(302, "https://${urlMatch.1}${urlMatch.2}${urlMatch.3}")
 request if ${url} ~= /^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad/i then reject(200)
@@ -10,7 +27,9 @@ request if ${url} ~= /^https?:\/\/(www|s)\.youtube\.com\/(pagead|ptracking)/i th
 request if ${url} ~= /^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext/i then reject(200)
 
 [Script]
-response if ${url} ~= /^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js") with tag="youtube.response", timeout=60, requires_body=true, binary_body_mode=true
+response if ${url} ~= /^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)(?:\?.*)?$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js", {${lyricLang}, ${captionLang}, ${blockUpload}, ${blockImmersive}, ${blockShorts}, ${keepSubsShorts}, ${hideSubscriptionsTab}, ${hideLibraryTab}, ${blockShelves}, ${blockGames}, ${blockStore}, ${blockVerticalLive}, ${blockEndScreen}, ${debug}}) with tag="YouTube-Enhance", timeout=30, requires_body=true, binary_body_mode=true
 request if ${url} ~= /^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player\/ad_break(?:\?.*)?$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js") with tag="youtube.enhance.ad-break"
 [MITM]
+[MITM]
 hostname = *.googlevideo.com, redirector*.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
+
