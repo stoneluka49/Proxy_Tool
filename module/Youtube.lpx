@@ -9,7 +9,8 @@ keepSubsShorts = switch,false,tag=订阅页保留 Shorts,desc=开启「屏蔽 Sh
 blockUpload = switch,true,tag=隐藏「创建」按钮,desc=移除底栏中间的 + 创建按钮
 hideSubscriptionsTab = switch,false,tag=隐藏「订阅」标签,desc=从底栏移除订阅标签页
 hideLibraryTab = switch,false,tag=隐藏「我」标签,desc=从底栏移除「我」标签页。隐藏后无法从底栏进入账号页面，慎用
-blockShelves = switch,false,tag=首页隐藏横向货架(实验),desc=移除首页的横向货架（继续观看、新闻、帖子合集等）。翻页加载的内容可能不生效
+blockShelves = switch,false,tag=首页隐藏横向货架,desc=移除首页的横向货架，例如「再看一遍」，仅作用于首页
+blockPosts = switch,false,tag=屏蔽社区帖子,desc=移除首页和订阅页信息流里的社区帖子（图片帖等），频道页内的帖子不受影响
 blockGames = switch,true,tag=屏蔽小游戏,desc=移除信息流与视频页里的 Playables 小游戏卡片
 blockStore = switch,true,tag=屏蔽商店与商品,desc=移除商店标签、商品货架、视频下方的商品卡片和商品浮层
 blockVerticalLive = switch,false,tag=屏蔽竖屏直播,desc=移除首页信息流里的竖屏沉浸式直播，横屏直播不受影响
@@ -27,7 +28,9 @@ request if ${url} ~= /^https?:\/\/(www|s)\.youtube\.com\/(pagead|ptracking)/i th
 request if ${url} ~= /^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext/i then reject(200)
 
 [Script]
-response if ${url} ~= /^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)(?:\?.*)?$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js", {${lyricLang}, ${captionLang}, ${blockUpload}, ${blockImmersive}, ${blockShorts}, ${keepSubsShorts}, ${hideSubscriptionsTab}, ${hideLibraryTab}, ${blockShelves}, ${blockGames}, ${blockStore}, ${blockVerticalLive}, ${blockEndScreen}, ${debug}}) with tag="YouTube-Enhance", timeout=30, requires_body=true, binary_body_mode=true
+
+response if ${url} ~= /^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch)(?:\?.*)?$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/response.js", {${lyricLang}, ${captionLang}, ${blockUpload}, ${blockImmersive}, ${blockShorts}, ${keepSubsShorts}, ${hideSubscriptionsTab}, ${hideLibraryTab}, ${blockShelves}, ${blockPosts}, ${blockGames}, ${blockStore}, ${blockVerticalLive}, ${blockEndScreen}, ${debug}}) with tag="YouTube-Enhance", timeout=30, requires_body=true, binary_body_mode=true
+
 request if ${url} ~= /^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player\/ad_break(?:\?.*)?$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Youtube/youtube.request.js") with tag="youtube.enhance.ad-break"
 
 [MITM]
