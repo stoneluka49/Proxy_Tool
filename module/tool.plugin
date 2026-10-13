@@ -1,13 +1,11 @@
 
 #!name = 综合去广告与VIP解锁脚本集
-#!desc = 移除 MissAV 网页弹窗广告、滴滴/美团/爱思助手应用内广告，并解锁 AdGuard 高级功能与 Pixiv 论坛优化。
-#!author=chxm1023 + ddgksf2013 + ZenmoFeiShi + stoneluka49
+#!desc = 移除 MissAV 网页弹窗广告、美团/爱思助手应用内广告，并解锁 AdGuard 高级功能与 Pixiv 论坛优化。
+#!author=chxm1023 + ddgksf2013 + stoneluka49
+#!date = 2026-10-13
 
 [Rule]
 
-# > 滴滴
-IP-CIDR,123.207.209.39/32,REJECT-DROP,no-resolve
-IP-CIDR,123.207.209.60/32,REJECT-DROP,no-resolve
 #美团
 URL-REGEX,"^https?:\/\/(s3plus|flowplus)\.meituan\.net\/v\d\/\w+\/linglong\/\w+\.(gif|jpg|mp4)",REJECT
 
@@ -17,12 +15,7 @@ URL-REGEX,"^https?:\/\/(s3plus|flowplus)\.meituan\.net\/v\d\/\w+\/linglong\/\w+\
 request if ${url} ~= /^https:\/\/missav\.ws\/pop\?/i then reject(200)
 # > 爱思助手
 request if ${url} ~= /^https?:\/\/list-app-m\.i4\.cn\/getopfstadinfo\.xhtml/i then reject(404)
-# > 滴滴青桔
-request if ${url} ~= /^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif)/i then reject(200)
-request if ${url} ~= /^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api/i then reject(200)
-# 横幅广告
-request if ${url} ~= /^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name=/i then reject_dict(200)
-request if ${url} ~= /^https?:\/\/daijia\.kuaidadi\.com\/gateway\?api=prado\.cms\.delivery\.batch&apiVe/i then reject_dict(200)
+
 [Script]
 # 在视频页 <head> 后注入:让 window.open 失效,并伪装成"窗口已关闭"
 response if ${url} ~= /^https:\/\/missav\.ws\/(?!(?:pop|build|cdn-cgi|api|img|fonts|js)(?:\/|\?|$))[^?]*$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/MISSAV/response.js") with tag="MissAV去弹窗", requires_body=true
@@ -34,4 +27,4 @@ response if ${url} ~= /^https?:\/\/oauth\.secure\.pixiv\.net\/(auth\/token)/i th
 response if ${url} ~= /^https?:\/\/mobile-api\.adguard\.org\/api\/.+\/ios_validate_receipt\/(.*?)/i then script("https://raw.githubusercontent.com/chxm1023/Rewrite/main/AdGuard.js") with tag="AdGuard", requires_body=true
 
 [MITM]
-hostname = missav.ws,pt-starimg.didistatic.com,omgup*.xiaojukeji.com,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,flowplus.meituan.net
+hostname = missav.ws,mobile-api.adguard.org,list-app-m.i4.cn,oauth.secure.pixiv.net,flowplus.meituan.net
