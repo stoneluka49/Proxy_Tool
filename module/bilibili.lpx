@@ -50,7 +50,7 @@ request if ${url} ~= /^(https?):\/\/upos-sz-mirror[a-z0-9-]*ov\.bilivideo\.com(?
 request if ${url} ~= /^(https?):\/\/upos-hz-mirrorakam\.akamaized\.net\/(?:v1\/resource\/)?upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-hz-mirrorali.bilivideo.com/upgcxcode/${urlMatch.2}")
 
 # ---- 3)把所有 302/301 到 *.yirujs.com 的 Location 改写到腾讯云
-request if ${url} ~= /^https?:\/\/([a-zA-Z0-9.-]+)\.yirujs\.com(?::\d+)?(\/.*)$/i then request.header.set("Location", "https://upos-sz-mirrorcos.bilivideo.com$2")
+request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.yirujs\.com\/(.+)/i as urlMatch then redirect(302, "http://upos-sz-mirrorcos.bilivideo.com/${urlMatch.1}")
 
 # ---- 4)  MCDN -> 腾讯云 mirrorcos  ----
 request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?(\/(?:v1\/resource\/)?upgcxcode\/.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com${urlMatch.2}")
