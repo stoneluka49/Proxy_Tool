@@ -2,7 +2,12 @@
 #!desc = 过滤国际版BILIBILI广告、扫码登录原生签名修复、1080P高码率画质解锁、Bilibili国际版-分区修复(针对国际版BILIBILI 3.20.1 版本）
 #!date = 2026-10-16
 #!author = TomCatXue + ddgksf2013 + bm7 + kokoryh + stoneluka49
+[Rule]
 
+# Bilibili MCDN：playurlv3 下发的 MCDN URL 具有 os=mcdn，通常同时带 mcdnid。
+# 不按 IP 拦截，避免误伤 UPOS/其它官方 CDN。
+URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])os=mcdn(?:&|$),REJECT
+URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),REJECT
 
 [Rewrite]
 
