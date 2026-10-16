@@ -8,6 +8,9 @@
 # 不按 IP 拦截，避免误伤 UPOS/其它官方 CDN。
 URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])os=mcdn(?:&|$),REJECT
 URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),REJECT
+URL-REGEX,^https?://[^/]+/upgcxcode/.*(?:[?&])os=mcdn(?:&|$),REJECT
+URL-REGEX,^https?://[^/]+/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),REJECT
+
 
 [Rewrite]
 
