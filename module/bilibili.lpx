@@ -14,12 +14,6 @@ URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),RE
 #～BiliBili_哔哩哔哩_屏蔽IP请求
 request if ${url} ~= /^https?:\/\/app\.bilibili\.com\/x\/resource\/ip/i then reject(404)
 
-# 拦截哔哩哔哩数据遥测及不必要的数据上报，减少流量消耗与隐私追踪
-request if ${url} ~= /^https?:\/\/dataflow\.biliapi\.com\/log\/pbmobile\/(realtime|unrealtime)/i then reject(404)
-
-# 拦截第三方广告监测与转化上报
-request if ${url} ~= /^https?:\/\/cm\.biliapi\.com\/cm\/api\/conversion\/mobile\/v2/i then reject(404)
-
 #～BiliBili_哔哩哔哩_小卡片广告
 request if ${url} ~= /^https:\/\/api.bilibili.com\/pgc\/season\/player\/cards/i then reject_dict(200)
 
@@ -58,11 +52,8 @@ request if ${url} ~= /^(https?):\/\/upos-[a-z0-9]+-mirrorhw[a-z0-9]*\.bilivideo\
 # ---- 4) yirujs 节点 (zz12.yirujs.com 等) -> 阿里云 mirrorali ----
 request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.yirujs\.com(?::\d+)?(\/(?:v1\/resource\/)?upgcxcode\/.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-hz-mirrorali.bilivideo.com${urlMatch.2}")
 
-# 纯 IP + /v1/resource/ → 官方腾讯云 COS（保留路径和 query）
-request if ${url} ~= /^(https?):\/\/\d+\.\d+\.\d+\.\d+(?::\d+)?(\/v1\/resource\/.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com${urlMatch.2}")
-
-# 纯 IP + /upgcxcode/ → 官方腾讯云 COS（保留路径和 query）
-request if ${url} ~= /^(https?):\/\/\d+\.\d+\.\d+\.\d+(?::\d+)?(\/upgcxcode\/.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com${urlMatch.2}")
+# ---- 5)  MCDN -> 腾讯云 mirrorcos  ----
+request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?(\/(?:v1\/resource\/)?upgcxcode\/.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com${urlMatch.2}")
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
