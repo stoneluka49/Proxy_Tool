@@ -53,8 +53,7 @@ request if ${url} ~= /^(https?):\/\/upos-hz-mirrorakam\.akamaized\.net\/(?:v1\/r
 request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.yirujs\.com(?::\d+)?(\/.*)/i as urlMatch then redirect(302, "https://upos-sz-mirrorcos.bilivideo.com${urlMatch.1}")
 
 # ---- 4)  MCDN -> 腾讯云 mirrorcos  ----
-request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?((?:\/(?:v1\/resource\/)?upgcxcode\/).+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com${urlMatch.3}")
-
+request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
