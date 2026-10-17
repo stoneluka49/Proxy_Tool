@@ -25,6 +25,9 @@ request if ${url} ~= /^https:\/\/api\.udache\.com\/gulfstream\/watson\/v1\/bubbl
 # > 滴滴青桔
 request if ${url} ~= /^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif)/i then reject(200)
 request if ${url} ~= /^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api/i then reject(200)
+request if ${url} ~= /htwkop\.xiaojukeji\.com.*api=cms\.htw\.delivery\.batch/i then reject(200)
+request if ${url} ~= /htwkop\.xiaojukeji\.com.*api=medel\.marketing\.spot\.delivery\.login/i then reject(200)
+
 # 横幅广告
 request if ${url} ~= /^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name=/i then reject_dict(200)
 request if ${url} ~= /^https?:\/\/daijia\.kuaidadi\.com\/gateway\?api=prado\.cms\.delivery\.batch&apiVe/i then reject_dict(200)
@@ -50,4 +53,4 @@ response if ${url} ~= /^https:\/\/ddpay\.xiaojukeji\.com\/ddpay\/api\/manhattan-
 response if ${url} ~= /^https:\/\/ddpay\.xiaojukeji\.com\/ddpay\/api\/manhattan-small-change\/get-apollo-config/i then response.json.jq(".data.result.hideList = []")
 
 [MITM]
-hostname = pt-starimg.didistatic.com,omgup*.xiaojukeji.com,common.diditaxi.com.cn, conf.diditaxi.com.cn, api.udache.com, res.xiaojukeji.com, ct.xiaojukeji.com, freight.xiaojukeji.com, mapi.xiaojukeji.com, manhattan.webapp.xiaojukeji.com, ddpay.xiaojukeji.com
+hostname = pt-starimg.didistatic.com,omgup*.xiaojukeji.com,common.diditaxi.com.cn, conf.diditaxi.com.cn, api.udache.com, res.xiaojukeji.com, ct.xiaojukeji.com, freight.xiaojukeji.com, mapi.xiaojukeji.com, manhattan.webapp.xiaojukeji.com, ddpay.xiaojukeji.com,htwkop.xiaojukeji.com
