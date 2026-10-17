@@ -25,8 +25,14 @@ request if ${url} ~= /^https:\/\/api\.udache\.com\/gulfstream\/watson\/v1\/bubbl
 # > 滴滴青桔
 request if ${url} ~= /^https?:\/\/pt-starimg\.didistatic\.com\/static\/starimg\/node\/.*.(jpg|png|gif)/i then reject(200)
 request if ${url} ~= /^https?:\/\/omgup[0-9]{1}\.xiaojukeji\.com\/api/i then reject(200)
-request if ${url} ~= /htwkop\.xiaojukeji\.com.*api=cms\.htw\.delivery\.batch/i then reject(200)
-request if ${url} ~= /htwkop\.xiaojukeji\.com.*api=medel\.marketing\.spot\.delivery\.login/i then reject(200)
+
+# 弹窗：cms.htw.delivery.batch 返回的各营销位里，名字含 popup 的（如 didi-ebike-homepage-popup）清空内容
+response if ${url} ~= /^https:\/\/htwkop\.xiaojukeji\.com(:443)?\/gateway\?(.*&)?api=cms\.htw\.delivery\.batch(&|$)/i then response.json.jq("if .data then .data |= with_entries(if (.key | test(\"popup\")) and (.value | type) == \"object\" then .value |= (.bizContent = [] | del(.variantInfo, .thirdTrackings, .tracking)) else . end) else . end")
+
+# 页面内广告条：老朋友专属福利(all-notice)、用滴滴支付(all-tab-infoflows) 等营销位，统一返回空内容
+response if ${url} ~= /^https:\/\/htwkop\.xiaojukeji\.com(:443)?\/gateway\?(.*&)?api=medel\.marketing\.spot\.delivery\.login(&|$)/i then response.json.jq("if .data then .data |= (.bizContent = [] | del(.variantInfo, .thirdTrackings, .tracking)) else . end")
+
+
 
 # 横幅广告
 request if ${url} ~= /^https?:\/\/as\.xiaojukeji\.com\/ep\/as\/conf\?ns=daijia-front&name=/i then reject_dict(200)
