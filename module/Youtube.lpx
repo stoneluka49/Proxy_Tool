@@ -1,7 +1,7 @@
 #!name=YouTube去广告
 #!desc=基于稳定版，额外去除首页Shorts/去除首页shorts区块/去除首页upload区块/去除视频播内嵌购推荐卡/blockGames/blockStore
 #!author=DivineEngine + app2smile + Maasea + ddgksf2013 + Aioneas + Oneasai + ZenmoFeiShi + gholts + stoneluka49
-
+#!date = 2026-10-17
 
 [Argument]
 blockShorts = switch,true,tag=屏蔽 Shorts,desc=首页/搜索/推荐里不再出现 Shorts，并移除底栏的 Shorts 按钮
@@ -10,7 +10,7 @@ blockUpload = switch,true,tag=隐藏「创建」按钮,desc=移除底栏中间�
 hideSubscriptionsTab = switch,false,tag=隐藏「订阅」标签,desc=从底栏移除订阅标签页
 hideLibraryTab = switch,false,tag=隐藏「我」标签,desc=从底栏移除「我」标签页。隐藏后无法从底栏进入账号页面，慎用
 blockShelves = switch,false,tag=首页隐藏横向货架,desc=移除首页的横向货架，例如「再看一遍」，仅作用于首页
-blockPosts = switch,false,tag=屏蔽社区帖子,desc=移除首页和订阅页信息流里的社区帖子（图片帖等），频道页内的帖子不受影响
+blockPosts = switch,false,tag=屏蔽社区帖子,desc=移除首页信息流里的社区帖子（图片帖等），频道页内的帖子不受影响
 blockGames = switch,true,tag=屏蔽小游戏,desc=移除信息流与视频页里的 Playables 小游戏卡片
 blockStore = switch,true,tag=屏蔽商店与商品,desc=移除商店标签、商品货架、视频下方的商品卡片和商品浮层
 blockVerticalLive = switch,false,tag=屏蔽竖屏直播,desc=移除首页信息流里的竖屏沉浸式直播，横屏直播不受影响
