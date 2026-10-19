@@ -14,9 +14,9 @@
  *   os=302ppio (upos-sz-302ppio.bilivideo.com -> *.nexusedgeio.com) -- PPIO 派欧云 PCDN
  *   os=bcache  -- 自建缓存/边缘节点 (IP 直连), 是否过滤由 BLOCK_OS 决定
  *
- * 做法: 每条轨道把 base_url + backup_url 合并, 剔除 PCDN, 剩下的按
+ * 做法: 每条轨道把 base_url + backup_url 合并, 剔除 MCDN/PCDN, 剩下的按
  *       "upos 域名(按 PREFER_HOSTS) > 官方 IP 节点" 排序, 第一个作 base_url, 其余作 backup_url。
- *       某条轨道如果全是 PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
+ *       某条轨道如果全是 MCDN/PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
  * 出错一律原样放行。
  *
  * 需要: JSON 接口用普通模式; gRPC 接口必须 binary-body-mode=true (见插件)。
