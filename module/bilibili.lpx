@@ -1,17 +1,7 @@
 #!name = 哔哩哔哩 𝕏
 #!desc = 过滤国际版BILIBILI广告、扫码登录原生签名修复、1080P高码率画质解锁、Bilibili国际版-分区修复(针对国际版BILIBILI 3.20.1 版本）
-#!date = 2026-10-17
+#!date = 2026-10-19
 #!author = TomCatXue + ddgksf2013 + bm7 + kokoryh + stoneluka49
-[Rule]
-
-# 兜底(可选, 默认关闭): 若仍有漏网的 MCDN 请求, 直接拒绝, 让 App 立刻换备用地址。
-# Bilibili MCDN：playurlv3 下发的 MCDN URL 具有 os=mcdn，通常同时带 mcdnid。
-# 不按 IP 拦截，避免误伤 UPOS/其它官方 CDN。
-URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])os=mcdn(?:&|$),REJECT
-URL-REGEX,^https?://[^/]+/v1/resource/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),REJECT
-URL-REGEX,^https?://[^/]+/upgcxcode/.*(?:[?&])os=mcdn(?:&|$),REJECT
-URL-REGEX,^https?://[^/]+/upgcxcode/.*(?:[?&])mcdnid=[^&]+(?:&|$),REJECT
-
 
 [Rewrite]
 
@@ -56,8 +46,10 @@ request if ${url} ~= /^(https?):\/\/upos-[a-z0-9]+-(?:mirrorhw[a-z0-9]*|estghw)\
 # ---- 4) 兜底: 如果请求仍然直接落到 yirujs 节点, 改到腾讯云 (不要改成 upos-hz-mirrorali, 该域名无法解析) ----
 request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.yirujs\.com(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
 
-# ---- 5)  MCDN 
+# ---- 5)  MCDN/PCDN
 request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
+request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.pcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
+request if ${url} ~= /^http:\/\/\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?\/v1\/resource\/upgcxcode\/.*[?&]os=(?:mcdn|302ppio|bcache)(?:&|$)/i then reject(404)
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
@@ -83,8 +75,14 @@ response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com|app\.bi
 # 兜底2: 其它 upos 节点若仍返回 302 -> yirujs, 在响应阶段把 Location 改到腾讯云
 response if ${url} ~= /^http:\/\/upos-[a-z0-9-]+\.bilivideo\.com(?::\d+)?\/upgcxcode\//i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_302.js") with tag="BiliFix302", timeout=5
 
-# Bilibili-剔除MCDN节点(只保留官方CDN)
-response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index(?:\/story|\/relate\/story)?\?/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_no_mcdn.js") with tag="BiliNoMCDN", timeout=15, requires_body=true
+# 1) 信息流 JSON (首页/Story/相关推荐里的 player_preload)
+response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index(?:\/story|\/relate\/story)?\?/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_cdn.js") with tag="BiliFIXCDN-Feed", timeout=15, requires_body=true
+
+# 2) gRPC 播放地址 PlayViewUnite (需要 binary-body-mode)
+response if ${url} ~= /^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(?:com|net))\/bilibili\.app\.playerunite\.v1\.Player\/PlayViewUnite$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_cdn.js") with tag="BiliFIXCDN-PlayViewUnite", timeout=20, requires_body=true, binary_body_mode=true
+
+# 3) gRPC 视频详情 View/View (内含 player_preload 预加载地址, 需要 binary-body-mode)
+response if ${url} ~= /^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(?:com|net))\/bilibili\.app\.viewunite\.v1\.View\/View$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_cdn.js") with tag="BiliFIXCDN-View", timeout=20, requires_body=true, binary_body_mode=true
 
 [MITM]
 hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com, app.biliapi.net, app.biliapi.com,*.bilivideo.com,*.yirujs.com,*.akamaized.net
