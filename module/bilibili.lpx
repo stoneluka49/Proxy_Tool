@@ -48,7 +48,6 @@ request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.yirujs\.com(?::\d+)?\/(?:v1\/
 
 # ---- 5)  MCDN/PCDN
 request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
-request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.pcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
 request if ${url} ~= /^http:\/\/\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?\/v1\/resource\/upgcxcode\/.*[?&]os=(?:mcdn|302ppio|bcache)(?:&|$)/i then reject(404)
 
 [Script]
