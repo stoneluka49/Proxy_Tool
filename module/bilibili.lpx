@@ -34,18 +34,14 @@ response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo\?/i
 response if ${url} ~= /^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(interface\.v1\.(Teenagers\/ModeStatus|Search\/DefaultWords)|view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(PlayPause|ViewEndPage))$/i then response.header.add("grpc-status", "0")
 response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.show\.v1\.(Mixture\/(RegionIndex|RegionList)|Rank\/RankRegionList)$/i then response.header.add("grpc-status", "0")
 
-# ---- 1) 海外腾讯云 (mirror*ov) -> 腾讯云 mirrorcos ----
-request if ${url} ~= /^(https?):\/\/upos-sz-mirror[a-z0-9-]*ov\.bilivideo\.com(?::\d+)?\/upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
+# ---- 1) 海外腾讯云 (mirror*ov) -> 腾讯云 mirrorcos (http 明文) ----
+request if ${url} ~= /^http:\/\/upos-sz-mirror[a-z0-9-]*ov\.bilivideo\.com(?::\d+)?\/upgcxcode\/(.+)$/i as urlMatch then url.replace("http://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.1}")
 
-# ---- 2) Akamai 海外 -> 腾讯云 mirrorcos ----
-request if ${url} ~= /^(https?):\/\/upos-hz-mirrorakam\.akamaized\.net\/upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
+# ---- 2) Akamai 海外 -> 腾讯云 mirrorcos (http 明文) ----
+request if ${url} ~= /^http:\/\/upos-hz-mirrorakam\.akamaized\.net\/upgcxcode\/(.+)$/i as urlMatch then url.replace("http://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.1}")
 
-
-# ---- 4) 兜底: 如果请求仍然直接落到 yirujs 节点, 改到腾讯云 (不要改成 upos-hz-mirrorali, 该域名无法解析) ----
-request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.yirujs\.com(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
-
-# ---- 5)  MCDN/PCDN
-request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
+# ---- 3)  MCDN
+request if ${url} ~= /^http:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
@@ -68,9 +64,6 @@ response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com|app\.bi
 
 response if ${url} ~= /^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(com|net))\/bilibili\.app\.viewunite\.v1\.View\/ViewProgress$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bilibili_dmview_clean.js") with tag="BiliDmClean-ViewProgress", timeout=10, requires_body=true, binary_body_mode=true
 
-# 兜底2: 其它 upos 节点若仍返回 302 -> yirujs, 在响应阶段把 Location 改到腾讯云
-response if ${url} ~= /^http:\/\/upos-[a-z0-9-]+\.bilivideo\.com(?::\d+)?\/upgcxcode\//i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_302.js") with tag="BiliFix302", timeout=5
-
 # 1) 信息流 JSON (首页/Story/相关推荐里的 player_preload)
 response if ${url} ~= /^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index(?:\/story|\/relate\/story)?\?/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_cdn.js") with tag="BiliFIXCDN-Feed", timeout=15, requires_body=true
 
@@ -81,4 +74,4 @@ response if ${url} ~= /^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com|app\.
 response if ${url} ~= /^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com|app\.biliapi\.(?:com|net))\/bilibili\.app\.viewunite\.v1\.View\/View$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/BiliBili/bili_fix_cdn.js") with tag="BiliFIXCDN-View", timeout=20, requires_body=true, binary_body_mode=true
 
 [MITM]
-hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com, app.biliapi.net, app.biliapi.com,*.bilivideo.com,*.yirujs.com,*.akamaized.net
+hostname = grpc.biliapi.net,app.bilibili.com, api.bilibili.com, passport.bilibili.com, app.biliapi.net, app.biliapi.com
