@@ -19,9 +19,8 @@
  *       第一个作 base_url, 其余作 backup_url。
  *       某条轨道如果全是 PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
  *
- * 【v2 新增】易 302 节点处理 (抓包 428: mirrorhw / mirrorhwo1 / estghw 共 58 次请求 0 次成功):
+ * 【v2 新增】易 302 节点处理 ( mirrorhw / mirrorhwo1 / estghw ):
  *   这几个华为云域名会 302 到 *.yirujs.com; 经 Loon 改写 Location 或 url.replace 后, 后续请求全部 400,
- *   同一条音频轨 20 秒内重试 63 次、PlayViewUnite 被重复请求 10 次, 表现为长时间没声音/卡住。
  *   现在在播放地址下发阶段就把这些地址的主机换成 REWRITE_TO_HOST (http, 不经过 302), 并排在其它官方节点之后,
  *   这样 App 第一次请求就直连, 完全不依赖 Loon 去改 302。
  * 出错一律原样放行。
