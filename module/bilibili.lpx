@@ -40,15 +40,12 @@ request if ${url} ~= /^(https?):\/\/upos-sz-mirror[a-z0-9-]*ov\.bilivideo\.com(?
 # ---- 2) Akamai 海外 -> 腾讯云 mirrorcos ----
 request if ${url} ~= /^(https?):\/\/upos-hz-mirrorakam\.akamaized\.net\/upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
 
-# ---- 3) 华为云全系列 (mirrorhw / mirrorhwb / mirrorhwo1 / estghw) -> 腾讯云 mirrorcos ----
-request if ${url} ~= /^(https?):\/\/upos-[a-z0-9]+-(?:mirrorhw[a-z0-9]*|estghw)\.bilivideo\.com(?::\d+)?\/upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
 
 # ---- 4) 兜底: 如果请求仍然直接落到 yirujs 节点, 改到腾讯云 (不要改成 upos-hz-mirrorali, 该域名无法解析) ----
 request if ${url} ~= /^(https?):\/\/[a-zA-Z0-9-]+\.yirujs\.com(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\/(.+)$/i as urlMatch then url.replace("${urlMatch.1}://upos-sz-mirrorcos.bilivideo.com/upgcxcode/${urlMatch.2}")
 
 # ---- 5)  MCDN/PCDN
 request if ${url} ~= /^https?:\/\/[a-zA-Z0-9.-]+\.mcdn\.bilivideo\.(cn|com)(?::\d+)?\/(?:v1\/resource\/)?upgcxcode\//i then reject(404)
-request if ${url} ~= /^http:\/\/\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?\/v1\/resource\/upgcxcode\/.*[?&]os=(?:mcdn|302ppio|bcache)(?:&|$)/i then reject(404)
 
 [Script]
 # 自动捕获当前用户 access_key (供扫码登录签名生成使用)
