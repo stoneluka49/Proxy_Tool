@@ -15,7 +15,7 @@
  *   os=bcache  -- 自建缓存/边缘节点 (IP 直连), 是否过滤由 BLOCK_OS 决定
  *
  * 做法: 每条轨道把 base_url + backup_url 合并, 剔除 PCDN, 剩下的按
- *       "upos 域名(按 PREFER_HOSTS) > 官方 IP 节点 > 改写后的华为云节点" 排序,
+ *       "upos 域名(按 PREFER_HOSTS) > 官方 IP 节点(可关闭） > 改写后的华为云节点" 排序,
  *       第一个作 base_url, 其余作 backup_url。
  *       某条轨道如果全是 PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
  *
@@ -31,7 +31,7 @@ const TAG = "[BiliNoMCDN] ";
 
 // ===== 可自行修改 =====
 const BLOCK_OS = ["mcdn", "302ppio", "bcache"]; // 要剔除的节点 os 值; 不想过滤 bcache 就删掉它
-const KEEP_OFFICIAL_IP_NODES = true;   // true: 保留 os 不在 BLOCK_OS 里的 IP 直连官方节点; false: 只保留 upos-*.bilivideo.com 域名
+const KEEP_OFFICIAL_IP_NODES = false;   // true: 保留 os 不在 BLOCK_OS 里的 IP 直连官方节点; false: 只保留 upos-*.bilivideo.com 域名
 const PREFER_HOSTS = [                  // 优先使用的官方域名关键字 (按顺序), 不想指定就留空数组
   "mirrorcos", "estgcos", "mirrorali", "mirroralib",
 ];
