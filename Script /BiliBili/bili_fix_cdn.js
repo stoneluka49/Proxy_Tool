@@ -14,9 +14,16 @@
  *   os=302ppio (upos-sz-302ppio.bilivideo.com -> *.nexusedgeio.com) -- PPIO 派欧云 PCDN
  *   os=bcache  -- 自建缓存/边缘节点 (IP 直连), 是否过滤由 BLOCK_OS 决定
  *
- * 做法: 每条轨道把 base_url + backup_url 合并, 剔除 MCDN/PCDN, 剩下的按
- *       "upos 域名(按 PREFER_HOSTS) > 官方 IP 节点" 排序, 第一个作 base_url, 其余作 backup_url。
- *       某条轨道如果全是 MCDN/PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
+ * 做法: 每条轨道把 base_url + backup_url 合并, 剔除 PCDN, 剩下的按
+ *       "upos 域名(按 PREFER_HOSTS) > 官方 IP 节点 > 改写后的华为云节点" 排序,
+ *       第一个作 base_url, 其余作 backup_url。
+ *       某条轨道如果全是 PCDN (没有官方地址可替换), 保持原样, 避免该轨道无法播放。
+ *
+ * 【v2 新增】易 302 节点处理 (抓包 428: mirrorhw / mirrorhwo1 / estghw 共 58 次请求 0 次成功):
+ *   这几个华为云域名会 302 到 *.yirujs.com; 经 Loon 改写 Location 或 url.replace 后, 后续请求全部 400,
+ *   同一条音频轨 20 秒内重试 63 次、PlayViewUnite 被重复请求 10 次, 表现为长时间没声音/卡住。
+ *   现在在播放地址下发阶段就把这些地址的主机换成 REWRITE_TO_HOST (http, 不经过 302), 并排在其它官方节点之后,
+ *   这样 App 第一次请求就直连, 完全不依赖 Loon 去改 302。
  * 出错一律原样放行。
  *
  * 需要: JSON 接口用普通模式; gRPC 接口必须 binary-body-mode=true (见插件)。
@@ -29,6 +36,11 @@ const KEEP_OFFICIAL_IP_NODES = true;   // true: 保留 os 不在 BLOCK_OS 里的
 const PREFER_HOSTS = [                  // 优先使用的官方域名关键字 (按顺序), 不想指定就留空数组
   "mirrorcos", "estgcos", "mirrorali", "mirroralib",
 ];
+// 易 302 的华为云域名 (只匹配 mirrorhw / mirrorhwo1 / estghw; mirrorhwb 能直接 206, 不在此列)
+const REWRITE_REDIRECT_PRONE = true;
+const REDIRECT_PRONE_RE = /^https?:\/\/upos-[a-z0-9]+-(?:mirrorhw|mirrorhwo1|estghw)\.bilivideo\.com(?::\d+)?\//i;
+const REWRITE_TO_HOST = "upos-sz-mirrorcos.bilivideo.com";  // 改写后的主机 (腾讯云); 想换节点改这里
+const FORCE_HTTP = true;               // 改写后用 http (不依赖 MITM/HTTP2, 抓包里 http 直连 mirrorcos 返回 206)
 // =====================
 
 function osOf(u) { const m = /[?&]os=([^&]*)/i.exec(u); return m ? m[1].toLowerCase() : ""; }
@@ -51,16 +63,27 @@ function rank(u) {
   return PREFER_HOSTS.length + 1;
 }
 // 从一组候选地址里挑出官方地址并排序; 返回 null 表示"不需要改"或"没有可替换的"
-let stat = { tracks: 0, changed: 0, allPcdn: 0, removed: 0 };
+let stat = { tracks: 0, changed: 0, allPcdn: 0, removed: 0, converted: 0 };
+function isProne(u) { return REWRITE_REDIRECT_PRONE && REDIRECT_PRONE_RE.test(u); }
+function convertProne(u) {
+  return u.replace(/^(https?):\/\/[^\/]+/i, (m, sch) => (FORCE_HTTP ? "http" : sch) + "://" + REWRITE_TO_HOST);
+}
 function pickGood(all) {
   stat.tracks++;
   const good = all.filter((u) => !isPcdn(u) && (isUposHost(u) || (KEEP_OFFICIAL_IP_NODES && isIpNode(u))));
   const bad = all.length - good.length;
-  if (!bad) return null;
-  if (!good.length) { stat.allPcdn++; return null; }
-  const sorted = good.map((u, i) => ({ u: u, i: i, r: rank(u) })).sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.u);
-  const uniq = sorted.filter((u, i) => sorted.indexOf(u) === i);
+  if (!good.length) { if (bad) stat.allPcdn++; return null; }
+  const normal = good.filter((u) => !isProne(u));
+  const prone = good.filter(isProne);
+  const sorted = normal.map((u, i) => ({ u: u, i: i, r: rank(u) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.u);
+  const converted = prone.map(convertProne);
+  const merged = sorted.concat(converted);
+  const uniq = merged.filter((u, i) => merged.indexOf(u) === i);
+  const same = uniq.length === all.length && uniq.every((u, i) => u === all[i]);
+  if (same) return null;
   stat.removed += bad;
+  stat.converted += prone.length;
   stat.changed++;
   return uniq;
 }
@@ -363,7 +386,7 @@ function main() {
     const j = JSON.parse(body);
     walkJson(j);
     if (!stat.changed) { console.log(TAG + "json no change (tracks=" + stat.tracks + ", allPcdn=" + stat.allPcdn + ")"); return $done({}); }
-    console.log(TAG + "json tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " allPcdnKept=" + stat.allPcdn);
+    console.log(TAG + "json tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " allPcdnKept=" + stat.allPcdn);
     return $done({ body: JSON.stringify(j) });
   }
   if (!body || body.length < 5) return $done({});
@@ -371,7 +394,7 @@ function main() {
   if (!out) { console.log(TAG + "grpc no change (tracks=" + stat.tracks + ", allPcdn=" + stat.allPcdn + ")"); return $done({}); }
   const headers = {};
   Object.keys($response.headers || {}).forEach((k) => { if (k.toLowerCase() !== "content-length") headers[k] = $response.headers[k]; });
-  console.log(TAG + "grpc tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " allPcdnKept=" + stat.allPcdn);
+  console.log(TAG + "grpc tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " allPcdnKept=" + stat.allPcdn);
   $done({ headers: headers, body: out });
 }
 
