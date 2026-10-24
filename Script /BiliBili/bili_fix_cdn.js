@@ -27,11 +27,16 @@
  *
  * 需要: JSON 接口用普通模式; gRPC 接口必须 binary-body-mode=true (见插件)。
  */
+
 const TAG = "[BiliNoMCDN] ";
 
 // ===== 可自行修改 =====
 const BLOCK_OS = ["mcdn", "302ppio", "bcache"]; // 要剔除的节点 os 值; 不想过滤 bcache 就删掉它
-const KEEP_OFFICIAL_IP_NODES = false;   // true: 保留 os 不在 BLOCK_OS 里的 IP 直连官方节点; false: 只保留 upos-*.bilivideo.com 域名
+const KEEP_OFFICIAL_IP_NODES = false;   // true: 保留 os 不在 BLOCK_OS 里的 IP 直连官方节点
+                                       // false: 只要有 upos-*.bilivideo.com 域名候选就只用域名; 某条轨道一个域名都没有时, 见下面两个选项
+// 【v4】KEEP_OFFICIAL_IP_NODES = false 且某条轨道没有任何 upos 域名候选 (信息流预加载里很常见, 只给 IP:8000) 时:
+const DROP_PRELOAD_IF_NO_DOMAIN = true; // true: 直接去掉这个视频的 player_preload, 让 App 播放时再向 PlayViewUnite 要地址 (那里通常有域名)
+                                        // false: 保留预加载, 但仍会剔除其中的 MCDN/PCDN, 只留下非 PCDN 的 IP 官方节点作为兜底(此时仍会看到少量 IP 节点)
 const PREFER_HOSTS = [                  // 优先使用的官方域名关键字 (按顺序), 不想指定就留空数组
   "mirrorcos", "estgcos", "mirrorali", "mirroralib",
 ];
@@ -40,6 +45,7 @@ const REWRITE_REDIRECT_PRONE = true;
 const REDIRECT_PRONE_RE = /^https?:\/\/upos-[a-z0-9]+-(?:mirrorhw|mirrorhwo1|estghw)\.bilivideo\.com(?::\d+)?\//i;
 const REWRITE_TO_HOST = "upos-sz-mirrorcos.bilivideo.com";  // 改写后的主机 (腾讯云); 想换节点改这里
 const FORCE_HTTP = true;               // 改写后用 http (不依赖 MITM/HTTP2, 抓包里 http 直连 mirrorcos 返回 206)
+
 // =====================
 
 function osOf(u) { const m = /[?&]os=([^&]*)/i.exec(u); return m ? m[1].toLowerCase() : ""; }
@@ -54,35 +60,40 @@ function isUposHost(u) {
   return /^https?:\/\/upos-[a-z0-9-]+\.bilivideo\.com\//i.test(u) || /^https?:\/\/upos-[a-z0-9-]+\.akamaized\.net\//i.test(u);
 }
 function isIpNode(u) { return /^https?:\/\/\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?\//.test(u); }
-function rank(u) {
-  if (isUposHost(u)) {
-    for (let i = 0; i < PREFER_HOSTS.length; i++) if (u.indexOf(PREFER_HOSTS[i]) >= 0) return i;
-    return PREFER_HOSTS.length;
-  }
-  return PREFER_HOSTS.length + 1;
+// 排序档位 (数字越小越靠前): PREFER_HOSTS 域名(按顺序) > 其它 upos 域名 > IP 节点(保持原顺序) > 改写后的华为云
+function tier(u, converted) {
+  if (isIpNode(u)) return 50;
+  if (converted) return 80;
+  for (let i = 0; i < PREFER_HOSTS.length; i++) if (u.indexOf(PREFER_HOSTS[i]) >= 0) return 1 + i;
+  return 40;
 }
-// 从一组候选地址里挑出官方地址并排序; 返回 null 表示"不需要改"或"没有可替换的"
-let stat = { tracks: 0, changed: 0, allPcdn: 0, removed: 0, converted: 0 };
+let stat = { tracks: 0, changed: 0, allPcdn: 0, removed: 0, converted: 0, dropped: 0 };
 function isProne(u) { return REWRITE_REDIRECT_PRONE && REDIRECT_PRONE_RE.test(u); }
 function convertProne(u) {
   return u.replace(/^(https?):\/\/[^\/]+/i, (m, sch) => (FORCE_HTTP ? "http" : sch) + "://" + REWRITE_TO_HOST);
 }
 function pickGood(all) {
   stat.tracks++;
-  const good = all.filter((u) => !isPcdn(u) && (isUposHost(u) || (KEEP_OFFICIAL_IP_NODES && isIpNode(u))));
+  const official = all.filter((u) => !isPcdn(u) && (isUposHost(u) || isIpNode(u)));
+  let good = official;
+  if (!KEEP_OFFICIAL_IP_NODES) {
+    const dom = official.filter(isUposHost);
+    if (dom.length) good = dom;            // 有域名候选就只用域名; 没有时才退回到非 PCDN 的 IP 节点(总比 MCDN 好)
+  }
   const bad = all.length - good.length;
   if (!good.length) { if (bad) stat.allPcdn++; return null; }
-  const normal = good.filter((u) => !isProne(u));
-  const prone = good.filter(isProne);
-  const sorted = normal.map((u, i) => ({ u: u, i: i, r: rank(u) }))
-    .sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.u);
-  const converted = prone.map(convertProne);
-  const merged = sorted.concat(converted);
+  const items = good.map((u, i) => {
+    const conv = isProne(u);
+    const nu = conv ? convertProne(u) : u;
+    return { u: nu, i: i, t: tier(nu, conv) };
+  });
+  items.sort((a, b) => a.t - b.t || a.i - b.i);
+  const merged = items.map((x) => x.u);
   const uniq = merged.filter((u, i) => merged.indexOf(u) === i);
   const same = uniq.length === all.length && uniq.every((u, i) => u === all[i]);
   if (same) return null;
   stat.removed += bad;
-  stat.converted += prone.length;
+  stat.converted += good.filter(isProne).length;
   stat.changed++;
   return uniq;
 }
@@ -109,6 +120,24 @@ function fixUri(uri) {
   try { pre = JSON.parse(decodeURIComponent(uri.substring(s, e))); } catch (x) { return uri; }
   const dash = pre && pre.dash;
   if (!dash) return uri;
+  if (!KEEP_OFFICIAL_IP_NODES && DROP_PRELOAD_IF_NO_DOMAIN) {
+    let noDomain = false;
+    ["video", "audio"].forEach((k) => {
+      (dash[k] || []).forEach((tr) => {
+        const all = [];
+        if (tr.base_url) all.push(tr.base_url);
+        (tr.backup_url || []).forEach((u) => { if (u) all.push(u); });
+        if (!all.some((u) => !isPcdn(u) && isUposHost(u))) noDomain = true;
+      });
+    });
+    if (noDomain) {
+      stat.dropped++;
+      let before = uri.substring(0, p), after = uri.substring(e);
+      if (/&$/.test(before)) before = before.slice(0, -1);
+      else if (/\?$/.test(before)) { if (after.charAt(0) === "&") after = after.slice(1); else before = before.slice(0, -1); }
+      return before + after;
+    }
+  }
   let changed = false;
   ["video", "audio"].forEach((k) => { (dash[k] || []).forEach((tr) => { if (fixTrack(tr)) changed = true; }); });
   if (!changed) return uri;
@@ -384,8 +413,8 @@ function main() {
   if (typeof body === "string") {            // JSON 信息流
     const j = JSON.parse(body);
     walkJson(j);
-    if (!stat.changed) { console.log(TAG + "json no change (tracks=" + stat.tracks + ", allPcdn=" + stat.allPcdn + ")"); return $done({}); }
-    console.log(TAG + "json tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " allPcdnKept=" + stat.allPcdn);
+    if (!stat.changed && !stat.dropped) { console.log(TAG + "json no change (tracks=" + stat.tracks + ", allPcdn=" + stat.allPcdn + ")"); return $done({}); }
+    console.log(TAG + "json tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " preloadDropped=" + stat.dropped + " allPcdnKept=" + stat.allPcdn);
     return $done({ body: JSON.stringify(j) });
   }
   if (!body || body.length < 5) return $done({});
@@ -393,7 +422,7 @@ function main() {
   if (!out) { console.log(TAG + "grpc no change (tracks=" + stat.tracks + ", allPcdn=" + stat.allPcdn + ")"); return $done({}); }
   const headers = {};
   Object.keys($response.headers || {}).forEach((k) => { if (k.toLowerCase() !== "content-length") headers[k] = $response.headers[k]; });
-  console.log(TAG + "grpc tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " allPcdnKept=" + stat.allPcdn);
+  console.log(TAG + "grpc tracks=" + stat.tracks + " changed=" + stat.changed + " removedUrls=" + stat.removed + " convertedHw=" + stat.converted + " preloadDropped=" + stat.dropped + " allPcdnKept=" + stat.allPcdn);
   $done({ headers: headers, body: out });
 }
 
