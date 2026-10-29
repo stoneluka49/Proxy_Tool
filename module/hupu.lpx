@@ -17,6 +17,8 @@ request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/\d\/\d\.\d\.\d+\/s
 request if ${url} ~= /^https:\/\/goblin\.hupu\.com\/\d\/\d\.\d\.\d+\/interfaceAd\/getOther\/(v\d|batch)/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/3\/8\.0\.86\/bplcommentapi\/bpl\/score_tab\/groups/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/3\/8\.0\.86\/bplapi\/banner\/getLocationBanners/i then reject_dict(200)
+response if ${url} ~= /^https?://goblin.hupu.com/\d+/[\d.]+/interfaceAd/getOther// then response.body.mock(”json“, {”ad_code“:-41,”show_type“:0,”ads“:[]}, 200)
+
 
 [MITM]
 hostname = *.hupu.com
