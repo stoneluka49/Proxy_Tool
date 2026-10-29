@@ -17,6 +17,9 @@ request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/\d\/\d\.\d\.\d+\/s
 request if ${url} ~= /^https:\/\/goblin\.hupu\.com\/\d\/\d\.\d\.\d+\/interfaceAd\/getOther\/(v\d|batch)/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/3\/8\.0\.86\/bplcommentapi\/bpl\/score_tab\/groups/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/games\.mobileapi\.hupu\.com\/3\/8\.0\.86\/bplapi\/banner\/getLocationBanners/i then reject_dict(200)
+[Script]
+# 匹配该接口并交由本地脚本处理
+response if ${url} ~= /^https?:\/\/goblin\.hupu\.com\/\d+\/[\d.]+\/interfaceAd\/getOther\//i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/HUPU/mock_ad.js") with tag="虎扑广告Mock"
 
 
 [MITM]
