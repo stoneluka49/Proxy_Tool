@@ -1,1 +1,21 @@
+#!name=Spotify(>=iOS15)
+#克隆app2smile大佬仓库，部分解锁premium,音质不能设置为超高(建议登录后再打开脚本,重启app等待脚本生效)
+#原仓库地址 https://github.com/app2smile/rules
+#!author=app2smile
+# 功能: 1.去除播放广告 2.歌手/专辑列表正常展示 3.去除随机播放
 
+[Rewrite]
+# if-none-match返回304状态码
+request if ${url} ~= /http-request/i then request.header.del("^https:\\/\\/(spclient\\.wg\\.spotify\\.com|.*-spclient\\.spotify\\.com(:443)?)\\/user-customization-service\\/v1\\/customize$")
+request if ${url} ~= /^https:\/\/(?:\w+-spclient|spclient\.wg)\.spotify\.com(?::443)?\/pendragon\//i then reject_dict(200)
+
+[Script]
+# Spotify JSON 修改脚本
+request if ${url} ~= /^https?:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/(artistview\/v1\/artist|album-entity-view\/v2\/album)\//i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Spotify/spotify-json.js") with tag="spotify-json"
+
+# Spotify Proto (Protobuf 二进制响应) 修改脚本
+response if ${url} ~= /^https?:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/(bootstrap\/v1\/bootstrap|user-customization-service\/v1\/customize)$/i then script("https://raw.githubusercontent.com/stoneluka49/Proxy_Tool/refs/heads/main/Script%20/Spotify/spotify-proto.js") with tag="spotify-proto", requires_body=true, binary_body_mode=true
+
+
+[MITM]
+hostname = spclient.wg.spotify.com, *-spclient.spotify.com
