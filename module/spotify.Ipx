@@ -6,7 +6,7 @@
 
 [Rewrite]
 # if-none-match返回304状态码
-request if ${url} ~= /http-request/i then request.header.del("^https:\\/\\/(spclient\\.wg\\.spotify\\.com|.*-spclient\\.spotify\\.com(:443)?)\\/user-customization-service\\/v1\\/customize$")
+request if ${url} ~= /^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/user-customization-service\/v1\/customize$/i then request.header.del("if-none-match")
 request if ${url} ~= /^https:\/\/(?:\w+-spclient|spclient\.wg)\.spotify\.com(?::443)?\/pendragon\//i then reject_dict(200)
 
 [Script]
